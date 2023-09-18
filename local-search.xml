@@ -4,6 +4,25 @@
   
   
   <entry>
+    <title>Flink 基础学习 -- 如何向 UDF 传递参数</title>
+    <link href="/2023/09/18/My-New-Post/"/>
+    <url>/2023/09/18/My-New-Post/</url>
+    
+    <content type="html"><![CDATA[<p>SQL API 中加上：</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SET</span> <span class="hljs-string">&#x27;pipeline.global-job-parameters&#x27;</span><span class="hljs-operator">=</span><span class="hljs-string">&#x27;env:prod&#x27;</span>;<br></code></pre></td></tr></table></figure><p>然后在 UserDefinedFunction 的 open 方法中获取：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">open</span><span class="hljs-params">(FunctionContext context)</span><span class="hljs-keyword">throws</span> Exception&#123;<br>    String currentEnv=context.getJobParameter(ENV,Constant.TEST);<br>    ... ...<br>&#125;<br></code></pre></td></tr></table></figure><p>相关链接：<a href="https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/config/">https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/config/</a></p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>Flink</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Hello World</title>
     <link href="/2023/07/13/hello-world/"/>
     <url>/2023/07/13/hello-world/</url>
