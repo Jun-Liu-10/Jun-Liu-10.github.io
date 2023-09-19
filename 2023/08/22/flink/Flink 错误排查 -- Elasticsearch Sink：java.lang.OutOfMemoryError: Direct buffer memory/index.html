@@ -7,8 +7,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
-  <link rel="icon" href="/img/fluid.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/web.jpeg">
+  <link rel="icon" href="/img/web.jpeg">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
@@ -26,7 +26,7 @@
 <meta property="og:image" content="http://example.com/img/flink/flink-es-sink.png">
 <meta property="og:image" content="http://example.com/img/flink/flink-taskmanager.png">
 <meta property="article:published_time" content="2023-08-22T06:14:12.000Z">
-<meta property="article:modified_time" content="2023-09-19T02:17:20.589Z">
+<meta property="article:modified_time" content="2023-09-19T02:17:43.297Z">
 <meta property="article:author" content="Liu Jun">
 <meta property="article:tag" content="Flink">
 <meta name="twitter:card" content="summary_large_image">
@@ -223,7 +223,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          365 字
+          370 字
         
       </span>
     
@@ -278,7 +278,7 @@
                 
                 <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>背景：近期上线了一个写 es 的 flink 任务，但是任务一直重启，然后进到 taskmanager 的日志找到了报错信息：<br><img src="/img/flink/flink-es-sink.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="问题原因"><a href="#问题原因" class="headerlink" title="问题原因"></a>问题原因</h2><p>因为写 es 的时候会把数据缓存在 直接内存（Direct Memory）&#x2F; 堆外内存 中，由报错信息可以看出，由于数据量比较大导致直接内存 OutOfMemory。</p>
-<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p><img src="/img/flink/flink-taskmanager.png" srcset="/img/loading.gif" lazyload><br>由 taskmanager 的内存模型来看，Direct Memory 由三部分组成：Framework Off-Heap、Task Off-Heap、Network；这里主要是用到了 Framework Off-Heap 这部分内存，所以可以调大 Task Off-Heap 的内存：</p>
+<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p><img src="/img/flink/flink-taskmanager.png" srcset="/img/loading.gif" lazyload><br>由 taskmanager 的内存模型来看，Direct Memory 由三部分组成：Framework Off-Heap、Task Off-Heap、Network；这里主要是用到了 Framework Off-Heap 这部分内存，所以可以调大 Framework Off-Heap 的内存：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-operator">-</span>Dtaskmanager.memory.framework.off<span class="hljs-operator">-</span>heap.size<span class="hljs-operator">=</span><span class="hljs-number">640</span>m<br></code></pre></td></tr></table></figure>
 
 <p>链接：</p>
