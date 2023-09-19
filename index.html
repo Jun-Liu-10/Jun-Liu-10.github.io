@@ -258,6 +258,46 @@
     </article>
   </div>
 
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/" target="_self">
+          Flink 错误排查 -- Elasticsearch Sink - java.lang.OutOfMemoryError Direct buffer memory
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/" target="_self">
+        <div>
+          问题描述背景：近期上线了一个写 es 的 flink 任务，但是任务一直重启，然后进到 taskmanager 的日志找到了报错信息： 问题原因因为写 es 的时候会把数据缓存在 直接内存（Direct Memory）&#x2F; 堆外内存 中，由报错信息可以看出，由于数据量比较大导致直接内存 OutOfMemory。 解决办法由 taskmanager 的内存模型来看，Direct Memory
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-08-22 14:14" pubdate>
+              2023-08-22
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Flink/">#Flink</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
 
 
 

@@ -22,5 +22,24 @@
   
   
   
+  <entry>
+    <title>Flink 错误排查 -- Elasticsearch Sink - java.lang.OutOfMemoryError Direct buffer memory</title>
+    <link href="/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/"/>
+    <url>/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/</url>
+    
+    <content type="html"><![CDATA[<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>背景：近期上线了一个写 es 的 flink 任务，但是任务一直重启，然后进到 taskmanager 的日志找到了报错信息：<br><img src="/img/flink/flink-es-sink.png"></p><h2 id="问题原因"><a href="#问题原因" class="headerlink" title="问题原因"></a>问题原因</h2><p>因为写 es 的时候会把数据缓存在 直接内存（Direct Memory）&#x2F; 堆外内存 中，由报错信息可以看出，由于数据量比较大导致直接内存 OutOfMemory。</p><h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p><img src="/img/flink/flink-taskmanager.png"><br>由 taskmanager 的内存模型来看，Direct Memory 由三部分组成：Framework Off-Heap、Task Off-Heap、Network；这里主要是用到了 Framework Off-Heap 这部分内存，所以可以调大 Task Off-Heap 的内存：</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-operator">-</span>Dtaskmanager.memory.framework.off<span class="hljs-operator">-</span>heap.size<span class="hljs-operator">=</span><span class="hljs-number">640</span>m<br></code></pre></td></tr></table></figure><p>链接：</p><ol><li><a href="https://nightlies.apache.org/flink/flink-docs-release-1.16/zh/docs/deployment/memory/mem_setup_tm/">Flink taskmanager 内存模型</a></li><li><a href="https://nightlies.apache.org/flink/flink-docs-release-1.16/zh/docs/deployment/memory/mem_trouble/">Flink 内存常见问题</a></li></ol>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>Flink</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
   
 </search>
