@@ -224,6 +224,8 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
         <a href="/2023/09/20/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20metrics%20%E6%8C%87%E6%A0%87%E6%96%AD%E6%96%AD%E7%BB%AD%E7%BB%AD/" target="_self">
           Flink 错误排查 -- Flink metrics 指标断断续续 - Prometheus + PushGateway + Grafana
         </a>
@@ -246,6 +248,27 @@
           </div>
         
         
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Flink-%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5/" class="category-chain-item">Flink 错误排查</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
         
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
@@ -263,6 +286,71 @@
     
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
+        <a href="/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/" target="_self">
+          Flink 错误排查 -- Elasticsearch Sink - java.lang.OutOfMemoryError Direct buffer memory
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/" target="_self">
+        <div>
+          问题描述背景：近期上线了一个写 es 的 flink 任务，但是任务一直重启，然后进到 taskmanager 的日志找到了报错信息： 问题原因因为写 es 的时候会把数据缓存在 直接内存（Direct Memory）&#x2F; 堆外内存 中，由报错信息可以看出，由于数据量比较大导致直接内存 OutOfMemory。 解决办法由 taskmanager 的内存模型来看，Direct Memory
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-08-22 14:14" pubdate>
+              2023-08-22
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Flink-%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5/" class="category-chain-item">Flink 错误排查</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Flink/">#Flink</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
         
         <a href="/2023/08/22/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E5%90%91%20UDF%20%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0/" target="_self">
           Flink 基础学习 -- 如何向 UDF 传递参数
@@ -286,45 +374,26 @@
           </div>
         
         
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
             
-              <a href="/tags/Flink/">#Flink</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
 
-  <div class="row mx-auto index-card">
+<span class="category-chains">
+  
+  
     
+      <span class="category-chain">
+        
+  <a href="/categories/Flink-%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" class="category-chain-item">Flink 基础学习</a>
+  
+  
+
+      </span>
     
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/" target="_self">
-          Flink 错误排查 -- Elasticsearch Sink - java.lang.OutOfMemoryError Direct buffer memory
-        </a>
-      </h2>
+  
+</span>
 
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/" target="_self">
-        <div>
-          问题描述背景：近期上线了一个写 es 的 flink 任务，但是任务一直重启，然后进到 taskmanager 的日志找到了报错信息： 问题原因因为写 es 的时候会把数据缓存在 直接内存（Direct Memory）&#x2F; 堆外内存 中，由报错信息可以看出，由于数据量比较大导致直接内存 OutOfMemory。 解决办法由 taskmanager 的内存模型来看，Direct Memory
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2023-08-22 14:14" pubdate>
-              2023-08-22
-            </time>
           </div>
-        
         
         
           <div class="post-meta">

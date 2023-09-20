@@ -11,6 +11,12 @@
     <content type="html"><![CDATA[<p>Prometheus + PushGateway + Grafana 是一套常用的监控 Flink metrics 的组合。网上有很多实践，这里就不赘述了。但是在使用的过程中还是遇到了一下问题。</p><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>如果一个任务有多个 taskmanager ，dashboard 上 taskmanager 相关的指标则是断断续续的，如图所示：<br><img src="/img/flink/flink-taskmanager-dashboard.png"></p><p>导致 metrics 断断续续的另外一个原因：<a href="https://blog.csdn.net/daijiguo/article/details/105453643">Flink问题：记Flink Metrics时断时续问题排查</a>；不过我已经将 push 方法改成 pushAdd 方法之后重新打包。</p><p>当前 PushGateway 相关的一些配置：</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql">metrics.reporter.promgateway.factory.class: org.apache.flink.metrics.prometheus.PrometheusPushGatewayReporterFactory<br>metrics.reporter.promgateway.hostUrl: http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>xxxx:<span class="hljs-number">9091</span><br>metrics.reporter.promgateway.randomJobNameSuffix: <span class="hljs-literal">false</span><br>metrics.reporter.promgateway.deleteOnShutdown: <span class="hljs-literal">true</span><br>metrics.reporter.promgateway.interval: <span class="hljs-number">30</span>s<br>metrics.reporter.promgateway.groupingKey: type<span class="hljs-operator">=</span>flink;env<span class="hljs-operator">=</span>test<br>metrics.reporter.promgateway.jobName: xxx <span class="hljs-comment">-- 提交任务的时候动态配置</span><br></code></pre></td></tr></table></figure><h2 id="问题原因"><a href="#问题原因" class="headerlink" title="问题原因"></a>问题原因</h2><p>PushGateway 是按照 jobName、groupingKey 和 metric_name 更新数据的，测试：<br><img src="/img/flink/flink-metrics-1.png"><br><img src="/img/flink/flink-metrics-2.png"><br>可以发现在 jobName &#x3D; my_job、groupingKey &#x3D; type&#x3D;flink;env&#x3D;test、metric_name &#x3D; my_custom_metrics 的情况下，上报了两次指标，<br>第一次为 tm_id&#x3D;”container_e64_1691562725918_0295_01_000001” 的指标；<br>第二次为 tm_id&#x3D;”container_e64_1691562725918_0295_01_000002” 的指标；<br>但是第二次的指标直接把第一次的覆盖了，所以在多个 taskmanager 的情况下，同一个指标会相互覆盖，出现指标断断续续的情况。</p><h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p>将 <strong>metrics.reporter.promgateway.randomJobNameSuffix</strong> 设置为 true，这样每个 container（jobmanager、taskmanager） 在 jobName 之后会加上一个随机后缀（如下图所示），<br>同时在 <strong>metrics.reporter.promgateway.groupingKey</strong> 在加上一个 <strong>job_name&#x3D;xxx</strong> 的 key，可以看到 PushGateway 上每个 container 都会生成一个 group，不会再出现不同 taskmanager 的同一个 metric 相互覆盖的情况。<br><img src="/img/flink/flink-metrics-3.png"></p><p>在 Grafana Dashboard 中我们可以通过 groupingKey 中加上的 job_name&#x3D;xxx 进行分类筛选：<br><img src="/img/flink/flink-metrics-4.png"><br><img src="/img/flink/flink-metrics-5.png"></p>]]></content>
     
     
+    <categories>
+      
+      <category>Flink 错误排查</category>
+      
+    </categories>
+    
     
     <tags>
       
@@ -30,6 +36,12 @@
     <content type="html"><![CDATA[<p>SQL API 中加上：</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SET</span> <span class="hljs-string">&#x27;pipeline.global-job-parameters&#x27;</span><span class="hljs-operator">=</span><span class="hljs-string">&#x27;env:prod&#x27;</span>;<br></code></pre></td></tr></table></figure><p>然后在 UserDefinedFunction 的 open 方法中获取：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">open</span><span class="hljs-params">(FunctionContext context)</span> <span class="hljs-keyword">throws</span> Exception &#123;<br>    String currentEnv=context.getJobParameter(ENV,Constant.TEST);<br>    ... ...<br>&#125;<br><br></code></pre></td></tr></table></figure><p>相关链接：<a href="https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/config/">https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/config/</a></p>]]></content>
     
     
+    <categories>
+      
+      <category>Flink 基础学习</category>
+      
+    </categories>
+    
     
     <tags>
       
@@ -48,6 +60,12 @@
     
     <content type="html"><![CDATA[<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>背景：近期上线了一个写 es 的 flink 任务，但是任务一直重启，然后进到 taskmanager 的日志找到了报错信息：<br><img src="/img/flink/flink-es-sink.png"></p><h2 id="问题原因"><a href="#问题原因" class="headerlink" title="问题原因"></a>问题原因</h2><p>因为写 es 的时候会把数据缓存在 直接内存（Direct Memory）&#x2F; 堆外内存 中，由报错信息可以看出，由于数据量比较大导致直接内存 OutOfMemory。</p><h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p><img src="/img/flink/flink-taskmanager.png"><br>由 taskmanager 的内存模型来看，Direct Memory 由三部分组成：Framework Off-Heap、Task Off-Heap、Network；这里主要是用到了 Framework Off-Heap 这部分内存，所以可以调大 Framework Off-Heap 的内存：</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-operator">-</span>Dtaskmanager.memory.framework.off<span class="hljs-operator">-</span>heap.size<span class="hljs-operator">=</span><span class="hljs-number">640</span>m<br></code></pre></td></tr></table></figure><p>链接：</p><ol><li><a href="https://nightlies.apache.org/flink/flink-docs-release-1.16/zh/docs/deployment/memory/mem_setup_tm/">Flink taskmanager 内存模型</a></li><li><a href="https://nightlies.apache.org/flink/flink-docs-release-1.16/zh/docs/deployment/memory/mem_trouble/">Flink 内存常见问题</a></li></ol>]]></content>
     
+    
+    <categories>
+      
+      <category>Flink 错误排查</category>
+      
+    </categories>
     
     
     <tags>
