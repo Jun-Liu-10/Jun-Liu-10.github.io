@@ -1,0 +1,695 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/web.jpeg">
+  <link rel="icon" href="/img/web.jpeg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Liu Jun">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="背景用户在我们官网上或者是APP上会各种各样的操作行为，其中有几种典型的行为是值得做商机挖掘的，比如搜索并点击、浏览、加入购物车等等，希望大数据可以抓取过来，记载到这个客户名下，作为与客户沟通的信息谈资，同时做数据挖掘，自动推送线索到线上、线下团队，提高商机转化率。 需求根据需求我们需要筛选出过去180天满足线索规则的用户，比如：过去180天内浏览该商品超过10次，则符合要求；规则是按照公司和行为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink + StarRocks -- 用户行为挖掘与线索推荐">
+<meta property="og:url" content="http://example.com/2023/08/22/project/Flink%20+%20StarRocks%20--%20%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA%E6%8C%96%E6%8E%98%E4%B8%8E%E7%BA%BF%E7%B4%A2%E6%8E%A8%E8%8D%90/index.html">
+<meta property="og:site_name" content="ACMAN">
+<meta property="og:description" content="背景用户在我们官网上或者是APP上会各种各样的操作行为，其中有几种典型的行为是值得做商机挖掘的，比如搜索并点击、浏览、加入购物车等等，希望大数据可以抓取过来，记载到这个客户名下，作为与客户沟通的信息谈资，同时做数据挖掘，自动推送线索到线上、线下团队，提高商机转化率。 需求根据需求我们需要筛选出过去180天满足线索规则的用户，比如：过去180天内浏览该商品超过10次，则符合要求；规则是按照公司和行为">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/project/user-behavior-clue.png">
+<meta property="article:published_time" content="2023-08-22T06:14:12.000Z">
+<meta property="article:modified_time" content="2023-09-26T09:41:50.020Z">
+<meta property="article:author" content="Liu Jun">
+<meta property="article:tag" content="Flink + StarRocks">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/project/user-behavior-clue.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Flink + StarRocks -- 用户行为挖掘与线索推荐 - ACMAN</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.5-a","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Jun Liu の Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://fluid.s3.bitiful.net/bg/vdysjx.png?w=1920&fmt=webp') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Flink + StarRocks -- 用户行为挖掘与线索推荐"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-08-22 14:14" pubdate>
+          2023年8月22日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          16k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          136 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Flink + StarRocks -- 用户行为挖掘与线索推荐</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>用户在我们官网上或者是APP上会各种各样的操作行为，其中有几种典型的行为是值得做商机挖掘的，比如搜索并点击、浏览、加入购物车等等，希望大数据可以抓取过来，记载到这个客户名下，作为与客户沟通的信息谈资，同时做数据挖掘，自动推送线索到线上、线下团队，提高商机转化率。</p>
+<h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><p>根据需求我们需要筛选出过去180天满足线索规则的用户，比如：过去180天内浏览该商品超过10次，则符合要求；规则是按照公司和行为维度触发的，比如：同一个公司下多个用户触发了同一个行为，多个用户触发行为的累计值达到了阈值，就会触发线索，向下游发生信息。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>目前每天的数量大概是 5000w 条，那么180天的数据量为90亿条，数据量非常大，但是目前会对数据进行筛选，只保留固定几种行为的用户、剔除无效的行为（比如未登录用户的行为）之后，每天的数据量大概为 1w 条数据。考虑到未来的扩展性，所以在设计方案的时候需要考虑到数据量非常大的情况。</p>
+<h2 id="设计方案"><a href="#设计方案" class="headerlink" title="设计方案"></a>设计方案</h2><h3 id="方案一：Flink-State-TTL"><a href="#方案一：Flink-State-TTL" class="headerlink" title="方案一：Flink State + TTL"></a>方案一：Flink State + TTL</h3><p>存在的问题：状态太大，占用过多的内存资源；任务失败之后恢复困难。</p>
+<h3 id="方案二：StarRocks-明细模型-物化视图-分区TTL"><a href="#方案二：StarRocks-明细模型-物化视图-分区TTL" class="headerlink" title="方案二：StarRocks 明细模型 + 物化视图 + 分区TTL"></a>方案二：StarRocks 明细模型 + 物化视图 + 分区TTL</h3><h4 id="StarRocks-明细模型：存储用户行为的明细："><a href="#StarRocks-明细模型：存储用户行为的明细：" class="headerlink" title="StarRocks 明细模型：存储用户行为的明细："></a>StarRocks 明细模型：存储用户行为的明细：</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> IF <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> dwd_pol_user_events (<br>    `credit_code` STRING <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `internal_event_code`   STRING <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `user_id` STRING <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `phone_number` STRING <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `<span class="hljs-type">date</span>`    <span class="hljs-type">DATE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span><br>)<br>    DUPLICATE KEY(`credit_code`, `internal_event_code`, `user_id`)<br>    <span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">RANGE</span>(`<span class="hljs-type">date</span>`) (<br>    <span class="hljs-keyword">START</span> (&quot;2023-01-20&quot;) <span class="hljs-keyword">END</span> (&quot;2023-08-08&quot;) <span class="hljs-keyword">EVERY</span> (<span class="hljs-type">INTERVAL</span> <span class="hljs-number">1</span> <span class="hljs-keyword">DAY</span>)<br>    )<br>    DISTRIBUTED <span class="hljs-keyword">BY</span> HASH(`credit_code`, `internal_event_code`) BUCKETS <span class="hljs-number">6</span><br>    PROPERTIES (<br>        &quot;replication_num&quot; <span class="hljs-operator">=</span> &quot;3&quot;,<br>        &quot;dynamic_partition.enable&quot; <span class="hljs-operator">=</span> &quot;true&quot;,<br>        &quot;dynamic_partition.time_unit&quot; <span class="hljs-operator">=</span> &quot;DAY&quot;,<br>        &quot;dynamic_partition.start&quot; <span class="hljs-operator">=</span> &quot;-179&quot;,<br>        &quot;dynamic_partition.end&quot; <span class="hljs-operator">=</span> &quot;1&quot;,<br>        &quot;dynamic_partition.prefix&quot; <span class="hljs-operator">=</span> &quot;p&quot;,<br>        &quot;dynamic_partition.buckets&quot; <span class="hljs-operator">=</span> &quot;6&quot;);<br></code></pre></td></tr></table></figure>
+<h4 id="物化视图：对-180-天的数据按照-company-internal-event-code（标签）-维度建物化视图，提高查询速度；"><a href="#物化视图：对-180-天的数据按照-company-internal-event-code（标签）-维度建物化视图，提高查询速度；" class="headerlink" title="物化视图：对 180 天的数据按照 company + internal_event_code（标签） 维度建物化视图，提高查询速度；"></a>物化视图：对 180 天的数据按照 company + internal_event_code（标签） 维度建物化视图，提高查询速度；</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> MATERIALIZED <span class="hljs-keyword">VIEW</span> dwd_pol_user_events_view <span class="hljs-keyword">AS</span> <br><span class="hljs-keyword">SELECT</span> `credit_code`, `internal_event_code`, <span class="hljs-built_in">COUNT</span>(`user_id`) <br><span class="hljs-keyword">FROM</span> dwd_pol_user_events <br><span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> `credit_code`, `internal_event_code`;<br></code></pre></td></tr></table></figure>
+<h4 id="分区TTL：设置-180-天的-TTL，StarRocks-只会保存-180-天的数据。"><a href="#分区TTL：设置-180-天的-TTL，StarRocks-只会保存-180-天的数据。" class="headerlink" title="分区TTL：设置 180 天的 TTL，StarRocks 只会保存 180 天的数据。"></a>分区TTL：设置 180 天的 TTL，StarRocks 只会保存 180 天的数据。</h4><p>参考建表语句中动态分区相关的配置。</p>
+<h3 id="方案二：StarRocks-聚合模型-物化视图-分区TTL"><a href="#方案二：StarRocks-聚合模型-物化视图-分区TTL" class="headerlink" title="方案二：StarRocks 聚合模型 + 物化视图 + 分区TTL"></a>方案二：StarRocks 聚合模型 + 物化视图 + 分区TTL</h3><h4 id="StarRocks-聚合模型：可以按照-date-company-internal-event-code（标签）提前聚合，大大减少数据量；"><a href="#StarRocks-聚合模型：可以按照-date-company-internal-event-code（标签）提前聚合，大大减少数据量；" class="headerlink" title="StarRocks 聚合模型：可以按照 date + company + internal_event_code（标签）提前聚合，大大减少数据量；"></a>StarRocks 聚合模型：可以按照 date + company + internal_event_code（标签）提前聚合，大大减少数据量；</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> IF <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> dwd_pol_user_events_agg (<br>    `credit_code` STRING <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `internal_event_code`   STRING <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `user_id` STRING <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `phone_number` STRING <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `<span class="hljs-type">date</span>`    <span class="hljs-type">DATE</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `pv` <span class="hljs-type">BIGINT</span> SUM <span class="hljs-keyword">DEFAULT</span> &quot;1&quot; COMMENT &quot;total page views&quot;<br>)<br>    AGGREGATE KEY(`credit_code`, `internal_event_code`, `user_id`, `phone_number`, `<span class="hljs-type">date</span>`)<br>    <span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> <span class="hljs-keyword">RANGE</span>(`<span class="hljs-type">date</span>`) (<br>    <span class="hljs-keyword">START</span> (&quot;2023-01-20&quot;) <span class="hljs-keyword">END</span> (&quot;2023-08-08&quot;) <span class="hljs-keyword">EVERY</span> (<span class="hljs-type">INTERVAL</span> <span class="hljs-number">1</span> <span class="hljs-keyword">DAY</span>)<br>    )<br>    DISTRIBUTED <span class="hljs-keyword">BY</span> HASH(`credit_code`, `internal_event_code`) BUCKETS <span class="hljs-number">6</span><br>    PROPERTIES (<br>        &quot;replication_num&quot; <span class="hljs-operator">=</span> &quot;3&quot;,<br>        &quot;dynamic_partition.enable&quot; <span class="hljs-operator">=</span> &quot;true&quot;,<br>        &quot;dynamic_partition.time_unit&quot; <span class="hljs-operator">=</span> &quot;DAY&quot;,<br>        &quot;dynamic_partition.start&quot; <span class="hljs-operator">=</span> &quot;-179&quot;,<br>        &quot;dynamic_partition.end&quot; <span class="hljs-operator">=</span> &quot;1&quot;,<br>        &quot;dynamic_partition.prefix&quot; <span class="hljs-operator">=</span> &quot;p&quot;,<br>        &quot;dynamic_partition.buckets&quot; <span class="hljs-operator">=</span> &quot;6&quot;);<br></code></pre></td></tr></table></figure>
+<h4 id="物化视图：对-180-天的数据按照-company-internal-event-code（标签）维度建物化视图，提高查询速度；"><a href="#物化视图：对-180-天的数据按照-company-internal-event-code（标签）维度建物化视图，提高查询速度；" class="headerlink" title="物化视图：对 180 天的数据按照 company + internal_event_code（标签）维度建物化视图，提高查询速度；"></a>物化视图：对 180 天的数据按照 company + internal_event_code（标签）维度建物化视图，提高查询速度；</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> MATERIALIZED <span class="hljs-keyword">VIEW</span> dwd_pol_user_events_agg_view <span class="hljs-keyword">AS</span> <br><span class="hljs-keyword">SELECT</span> `credit_code`, `internal_event_code`, <span class="hljs-built_in">SUM</span>(`pv`) <br><span class="hljs-keyword">FROM</span> dwd_pol_user_events_agg <br><span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> `credit_code`, `internal_event_code`;<br></code></pre></td></tr></table></figure>
+
+<h4 id="分区TTL：设置-180-天的-TTL，StarRocks-只会保存-180-天的数据。-1"><a href="#分区TTL：设置-180-天的-TTL，StarRocks-只会保存-180-天的数据。-1" class="headerlink" title="分区TTL：设置 180 天的 TTL，StarRocks 只会保存 180 天的数据。"></a>分区TTL：设置 180 天的 TTL，StarRocks 只会保存 180 天的数据。</h4><p>参考建表语句中动态分区相关的配置。</p>
+<h2 id="数据链路"><a href="#数据链路" class="headerlink" title="数据链路"></a>数据链路</h2><p><img src="/img/project/user-behavior-clue.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="每个-Flink-任务的功能："><a href="#每个-Flink-任务的功能：" class="headerlink" title="每个 Flink 任务的功能："></a>每个 Flink 任务的功能：</h3><ul>
+<li>①：对数据进行筛选，只保留产品定好的的几种行为、剔除无效的行为（比如未登录用户的行为）；</li>
+<li>②：负责将数据写入 StarRocks 和 Kafka，这边大家可能会有疑问，这里为什么要写到 Kafka 中？后面会解答。</li>
+<li>③：消费 Kafka 中的数据，并查询 StarRocks 统计过去 180 天 company 维度下所有用户触发了该行为的累计值，并查询 mysql 行为的阈值表，对比是否触发了阈值，如果触发了阈值，还需要查询行为的结果表，该 company 是否已经触发了线索，因为规定同一个 company 只能触发一次线索；</li>
+<li>④：消费 Kafka 中的数据，写入 elasticsearch 中，供用户查询详细的信息。</li>
+</ul>
+<h3 id="mysql-阈值表结构"><a href="#mysql-阈值表结构" class="headerlink" title="mysql 阈值表结构"></a>mysql 阈值表结构</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> dim_pol_clue_event_threshold<br>(<br>    internal_event_code <span class="hljs-type">varchar</span>(<span class="hljs-number">256</span>)                        <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;内部事件编码&#x27;</span><br>        <span class="hljs-keyword">primary</span> key,<br>    internal_event_name <span class="hljs-type">varchar</span>(<span class="hljs-number">256</span>)                        <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;内部事件名称&#x27;</span>,<br>    threshold_num       <span class="hljs-type">bigint</span>                              <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span>,<br>    create_time         <span class="hljs-type">timestamp</span> <span class="hljs-keyword">default</span> <span class="hljs-built_in">CURRENT_TIMESTAMP</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;创建时间&#x27;</span>,<br>    update_time         <span class="hljs-type">timestamp</span> <span class="hljs-keyword">default</span> <span class="hljs-built_in">CURRENT_TIMESTAMP</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> <span class="hljs-keyword">on</span> <span class="hljs-keyword">update</span> <span class="hljs-built_in">CURRENT_TIMESTAMP</span> comment <span class="hljs-string">&#x27;更新时间&#x27;</span><br>)<br>    comment <span class="hljs-string">&#x27;触发线索的时间阈值表&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<h3 id="mysql-结果表结构"><a href="#mysql-结果表结构" class="headerlink" title="mysql 结果表结构"></a>mysql 结果表结构</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> dwd_pol_clue_trigger_info<br>(<br>    credit_code         <span class="hljs-type">varchar</span>(<span class="hljs-number">256</span>)                        <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;内部事件编码&#x27;</span><br>        <span class="hljs-keyword">primary</span> key,<br>    company_name        <span class="hljs-type">varchar</span>(<span class="hljs-number">256</span>)                        <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;企业名称&#x27;</span>,<br>    phone_numbers       text                                <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;用户电话号码&#x27;</span>,<br>    internal_event_code <span class="hljs-type">varchar</span>(<span class="hljs-number">256</span>)                        <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;内部事件code&#x27;</span>,<br>    internal_event_name <span class="hljs-type">varchar</span>(<span class="hljs-number">256</span>)                        <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;内部事件名称&#x27;</span>,<br>    event_trigger_num   <span class="hljs-type">bigint</span>                              <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;触发值&#x27;</span>,<br>    create_time         <span class="hljs-type">timestamp</span> <span class="hljs-keyword">default</span> <span class="hljs-built_in">CURRENT_TIMESTAMP</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> comment <span class="hljs-string">&#x27;创建时间&#x27;</span>,<br>    update_time         <span class="hljs-type">timestamp</span> <span class="hljs-keyword">default</span> <span class="hljs-built_in">CURRENT_TIMESTAMP</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> <span class="hljs-keyword">on</span> <span class="hljs-keyword">update</span> <span class="hljs-built_in">CURRENT_TIMESTAMP</span> comment <span class="hljs-string">&#x27;更新时间&#x27;</span><br>)<br>    comment <span class="hljs-string">&#x27;线索触发信息&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<h2 id="其他事项"><a href="#其他事项" class="headerlink" title="其他事项"></a>其他事项</h2><h3 id="第③个-Flink-任务中为什么要写-Kafka"><a href="#第③个-Flink-任务中为什么要写-Kafka" class="headerlink" title="第③个 Flink 任务中为什么要写 Kafka"></a>第③个 Flink 任务中为什么要写 Kafka</h3><p>因为下游的 Flink 任务需要根据 Kafka 中的数据触发查询 StarRocks 的行为，这样才能推动流的处理。</p>
+<h3 id=""><a href="#" class="headerlink" title=""></a></h3><h3 id="Flink-查询-StarRocks-UDF"><a href="#Flink-查询-StarRocks-UDF" class="headerlink" title="Flink 查询 StarRocks UDF"></a>Flink 查询 StarRocks UDF</h3><p>Flink 去查询 StarRocks 时使用的是 UDF，一共两个 UDF：</p>
+<ul>
+<li><p>获取 company 下某个行为的累计值：<br>公共类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StarRocksJdbcConnectionProvider</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Serializable</span> &#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Logger</span> <span class="hljs-variable">LOGGER</span> <span class="hljs-operator">=</span> LogManager.getLogger(StarRocksJdbcConnectionProvider.class);<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">long</span> <span class="hljs-variable">serialVersionUID</span> <span class="hljs-operator">=</span> <span class="hljs-number">1L</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> String env;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">transient</span> <span class="hljs-keyword">volatile</span> Connection connection;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">StarRocksJdbcConnectionProvider</span><span class="hljs-params">(String env)</span> &#123;<br>        <span class="hljs-built_in">this</span>.env = env;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Connection <span class="hljs-title function_">getConnection</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> SQLException, ClassNotFoundException &#123;<br>        <span class="hljs-keyword">if</span> (connection == <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">synchronized</span> (<span class="hljs-built_in">this</span>) &#123;<br>                <span class="hljs-keyword">if</span> (connection == <span class="hljs-literal">null</span>) &#123;<br>                    Class.forName(StarRocksJdbcConnConfig.DRIVER_NAME);<br>                    <span class="hljs-keyword">if</span> (PROD.equalsIgnoreCase(env)) &#123;<br>                        connection = DriverManager.getConnection(<br>                                StarRocksJdbcConnConfig.PROD_URL,<br>                                StarRocksJdbcConnConfig.PROD_USERNAME,<br>                                StarRocksJdbcConnConfig.PROD_PASSWORD);<br>                    &#125; <span class="hljs-keyword">else</span> &#123;<br>                        connection = DriverManager.getConnection(<br>                                StarRocksJdbcConnConfig.TEST_URL,<br>                                StarRocksJdbcConnConfig.TEST_USERNAME,<br>                                StarRocksJdbcConnConfig.TEST_PASSWORD);<br>                    &#125;<br>                &#125;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> connection;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Connection <span class="hljs-title function_">reestablishConnection</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> SQLException, ClassNotFoundException &#123;<br>        close();<br>        connection = getConnection();<br>        <span class="hljs-keyword">return</span> connection;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isConnectionValid</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> SQLException &#123;<br>        <span class="hljs-keyword">return</span> connection != <span class="hljs-literal">null</span><br>                &amp;&amp; connection.isValid(CONNECTION_CHECK_TIMEOUT_SECONDS);<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">close</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">if</span> (connection == <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>        <span class="hljs-keyword">try</span> &#123;<br>            connection.close();<br>        &#125; <span class="hljs-keyword">catch</span> (SQLException e) &#123;<br>            LOGGER.error(<span class="hljs-string">&quot;JDBC connection close failed.&quot;</span>, e);<br>        &#125; <span class="hljs-keyword">finally</span> &#123;<br>            connection = <span class="hljs-literal">null</span>;<br>        &#125;<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StarRocksJdbcConnConfig</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Serializable</span> &#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">long</span> <span class="hljs-variable">serialVersionUID</span> <span class="hljs-operator">=</span> <span class="hljs-number">1L</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">MAX_RETRY_TIMES</span> <span class="hljs-operator">=</span> <span class="hljs-number">3</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">CONNECTION_CHECK_TIMEOUT_SECONDS</span> <span class="hljs-operator">=</span> <span class="hljs-number">5</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-variable">DRIVER_NAME</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;com.mysql.cj.jdbc.Driver&quot;</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span>  <span class="hljs-variable">TEST_URL</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;jdbc:mysql://xxx:xxx/xxx&quot;</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span>  <span class="hljs-variable">TEST_USERNAME</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;xxx&quot;</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span>  <span class="hljs-variable">TEST_PASSWORD</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;xxx&quot;</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-variable">PROD_URL</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;jdbc:mysql://xxx:xxx/xxxx&quot;</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-variable">PROD_USERNAME</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;xxx&quot;</span>;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-variable">PROD_PASSWORD</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;xxx&quot;</span>;<br><br><br>&#125;<br></code></pre></td></tr></table></figure>
+<p>EventSum UDF：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">EventSum</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">ScalarFunction</span> &#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Logger</span> <span class="hljs-variable">LOGGER</span> <span class="hljs-operator">=</span> LogManager.getLogger(EventSum.class);<br><br>    <span class="hljs-keyword">private</span> StarRocksJdbcConnectionProvider jdbcConnProvider;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">transient</span> <span class="hljs-keyword">volatile</span> PreparedStatement statement;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-variable">QUERY</span> <span class="hljs-operator">=</span><br>            <span class="hljs-string">&quot;SELECT COUNT(`user_id`) FROM dwd_pol_user_events WHERE `credit_code` = ? AND `internal_event_code` = ?&quot;</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">establishStatement</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> SQLException, ClassNotFoundException &#123;<br>        statement = jdbcConnProvider.getConnection().prepareStatement(QUERY);<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">open</span><span class="hljs-params">(FunctionContext context)</span> <span class="hljs-keyword">throws</span> Exception &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">currentEnv</span> <span class="hljs-operator">=</span> context.getJobParameter(ENV, Constant.TEST);<br>        LOGGER.info(<span class="hljs-string">&quot;Current env: &#123;&#125;&quot;</span>, currentEnv);<br>        jdbcConnProvider = <span class="hljs-keyword">new</span> <span class="hljs-title class_">StarRocksJdbcConnectionProvider</span>(currentEnv);<br>        establishStatement();<br>    &#125;<br><br>    <span class="hljs-meta">@FunctionHint(</span><br><span class="hljs-meta">            input = &#123;@DataTypeHint(&quot;STRING&quot;), @DataTypeHint(&quot;STRING&quot;)&#125;,</span><br><span class="hljs-meta">            output = @DataTypeHint(&quot;BIGINT&quot;))</span><br>    <span class="hljs-keyword">public</span> Long <span class="hljs-title function_">eval</span><span class="hljs-params">(String creditCode, String internalEventCode)</span> <span class="hljs-keyword">throws</span> SQLException &#123;<br>        <span class="hljs-type">long</span> <span class="hljs-variable">sum</span> <span class="hljs-operator">=</span> <span class="hljs-number">0L</span>;<br>        <span class="hljs-keyword">if</span> (StrUtil.isBlankIfStr(creditCode) || StrUtil.isBlankIfStr(internalEventCode)) &#123;<br>            <span class="hljs-keyword">return</span> sum;<br>        &#125;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">retry</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; retry &lt;= MAX_RETRY_TIMES; retry++) &#123;<br>            <span class="hljs-keyword">try</span> &#123;<br>                statement.clearParameters();<br>                statement.setString(<span class="hljs-number">1</span>, creditCode);<br>                statement.setString(<span class="hljs-number">2</span>, internalEventCode);<br>                <span class="hljs-keyword">try</span> (<span class="hljs-type">ResultSet</span> <span class="hljs-variable">resultSet</span> <span class="hljs-operator">=</span> statement.executeQuery()) &#123;<br>                    <span class="hljs-keyword">while</span> (resultSet.next()) &#123;<br>                        <span class="hljs-type">Object</span> <span class="hljs-variable">object</span> <span class="hljs-operator">=</span> resultSet.getObject(<span class="hljs-number">1</span>);<br>                        sum = object == <span class="hljs-literal">null</span> ? sum : (Long) object;<br>                    &#125;<br>                &#125;<br>            &#125; <span class="hljs-keyword">catch</span> (SQLException e) &#123;<br>                LOGGER.error(String.format(<span class="hljs-string">&quot;JDBC executeBatch error, retry times = %d&quot;</span>, retry), e);<br>                <span class="hljs-keyword">if</span> (retry &gt;= MAX_RETRY_TIMES) &#123;<br>                    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;Execution of JDBC statement failed.&quot;</span>, e);<br>                &#125;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    <span class="hljs-keyword">if</span> (!jdbcConnProvider.isConnectionValid()) &#123;<br>                        statement.close();<br>                        jdbcConnProvider.reestablishConnection();<br>                        establishStatement();<br>                    &#125;<br>                &#125; <span class="hljs-keyword">catch</span> (SQLException | ClassNotFoundException exception) &#123;<br>                    LOGGER.error(<br>                            <span class="hljs-string">&quot;JDBC connection is not valid, and reestablish connection failed&quot;</span>,<br>                            exception);<br>                    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;Reestablish JDBC connection failed&quot;</span>, exception);<br>                &#125;<br><br>                <span class="hljs-keyword">try</span> &#123;<br>                    Thread.sleep(<span class="hljs-number">1000L</span> * retry);<br>                &#125; <span class="hljs-keyword">catch</span> (InterruptedException e1) &#123;<br>                    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(e1);<br>                &#125;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> sum;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">close</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> SQLException &#123;<br>        <span class="hljs-keyword">if</span> (statement != <span class="hljs-literal">null</span>) &#123;<br>            statement.close();<br>        &#125;<br>        jdbcConnProvider.close();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>获取 company 触发了某个行为的所有用户手机号码：<br>ExtractPhoneNumbers UDF：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ExtractPhoneNumbers</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">ScalarFunction</span> &#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Logger</span> <span class="hljs-variable">LOGGER</span> <span class="hljs-operator">=</span> LogManager.getLogger(ExtractPhoneNumbers.class);<br><br>    <span class="hljs-keyword">private</span> StarRocksJdbcConnectionProvider jdbcConnProvider;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">transient</span> <span class="hljs-keyword">volatile</span> PreparedStatement statement;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">String</span> <span class="hljs-variable">QUERY</span> <span class="hljs-operator">=</span><br>            <span class="hljs-string">&quot;SELECT group_concat(phone_numbers) FROM (SELECT distinct phone_number as phone_numbers FROM dwd_pol_user_events WHERE credit_code = ? AND `internal_event_code` = ? AND phone_number &lt;&gt; &#x27;&#x27;) t1&quot;</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">establishStatement</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> SQLException, ClassNotFoundException &#123;<br>        statement = jdbcConnProvider.getConnection().prepareStatement(QUERY);<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">open</span><span class="hljs-params">(FunctionContext context)</span> <span class="hljs-keyword">throws</span> Exception &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">currentEnv</span> <span class="hljs-operator">=</span> context.getJobParameter(ENV, Constant.TEST);<br>        LOGGER.info(<span class="hljs-string">&quot;Current env: &#123;&#125;&quot;</span>, currentEnv);<br>        jdbcConnProvider = <span class="hljs-keyword">new</span> <span class="hljs-title class_">StarRocksJdbcConnectionProvider</span>(currentEnv);<br>        establishStatement();<br>    &#125;<br><br>    <span class="hljs-meta">@FunctionHint(</span><br><span class="hljs-meta">            input = &#123;@DataTypeHint(&quot;STRING&quot;), @DataTypeHint(&quot;STRING&quot;)&#125;,</span><br><span class="hljs-meta">            output = @DataTypeHint(&quot;STRING&quot;))</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">eval</span><span class="hljs-params">(String creditCode, String internalEventCode)</span> <span class="hljs-keyword">throws</span> SQLException &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">phoneNumbers</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;&quot;</span>;<br>        <span class="hljs-keyword">if</span> (StrUtil.isBlankIfStr(creditCode) || StrUtil.isBlankIfStr(internalEventCode)) &#123;<br>            <span class="hljs-keyword">return</span> phoneNumbers;<br>        &#125;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">retry</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; retry &lt;= MAX_RETRY_TIMES; retry++) &#123;<br>            <span class="hljs-keyword">try</span> &#123;<br>                statement.clearParameters();<br>                statement.setString(<span class="hljs-number">1</span>, creditCode);<br>                statement.setString(<span class="hljs-number">2</span>, internalEventCode);<br>                <span class="hljs-keyword">try</span> (<span class="hljs-type">ResultSet</span> <span class="hljs-variable">resultSet</span> <span class="hljs-operator">=</span> statement.executeQuery()) &#123;<br>                    <span class="hljs-keyword">while</span> (resultSet.next()) &#123;<br>                        <span class="hljs-type">Object</span> <span class="hljs-variable">object</span> <span class="hljs-operator">=</span> resultSet.getObject(<span class="hljs-number">1</span>);<br>                        phoneNumbers = object == <span class="hljs-literal">null</span> ? phoneNumbers : (String) object;<br>                    &#125;<br>                &#125;<br>            &#125; <span class="hljs-keyword">catch</span> (SQLException e) &#123;<br>                LOGGER.error(String.format(<span class="hljs-string">&quot;JDBC executeBatch error, retry times = %d&quot;</span>, retry), e);<br>                <span class="hljs-keyword">if</span> (retry &gt;= MAX_RETRY_TIMES) &#123;<br>                    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;Execution of JDBC statement failed.&quot;</span>, e);<br>                &#125;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    <span class="hljs-keyword">if</span> (!jdbcConnProvider.isConnectionValid()) &#123;<br>                        statement.close();<br>                        jdbcConnProvider.reestablishConnection();<br>                        establishStatement();<br>                    &#125;<br>                &#125; <span class="hljs-keyword">catch</span> (SQLException | ClassNotFoundException exception) &#123;<br>                    LOGGER.error(<br>                            <span class="hljs-string">&quot;JDBC connection is not valid, and reestablish connection failed&quot;</span>,<br>                            exception);<br>                    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;Reestablish JDBC connection failed&quot;</span>, exception);<br>                &#125;<br><br>                <span class="hljs-keyword">try</span> &#123;<br>                    Thread.sleep(<span class="hljs-number">1000L</span> * retry);<br>                &#125; <span class="hljs-keyword">catch</span> (InterruptedException e1) &#123;<br>                    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(e1);<br>                &#125;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> phoneNumbers;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">close</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> SQLException &#123;<br>        <span class="hljs-keyword">if</span> (statement != <span class="hljs-literal">null</span>) &#123;<br>            statement.close();<br>        &#125;<br>        jdbcConnProvider.close();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="SQL-代码"><a href="#SQL-代码" class="headerlink" title="SQL 代码"></a>SQL 代码</h2><h3 id="②-号Flink-任务"><a href="#②-号Flink-任务" class="headerlink" title="② 号Flink 任务"></a>② 号Flink 任务</h3><p>任务配置：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">-p 3<br></code></pre></td></tr></table></figure>
+<p>SQL：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span><br>CATALOG kafka <span class="hljs-keyword">WITH</span> (<br>    <span class="hljs-string">&#x27;type&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;hive&#x27;</span>,<br>    <span class="hljs-string">&#x27;default-database&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;bigdata_policy_rt&#x27;</span>,<br>    <span class="hljs-string">&#x27;hive-conf-dir&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;/etc/hive/conf&#x27;</span><br>);<br><br><span class="hljs-keyword">CREATE</span><br>CATALOG starrocks <span class="hljs-keyword">WITH</span> (<br>    <span class="hljs-string">&#x27;type&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;hive&#x27;</span>,<br>    <span class="hljs-string">&#x27;default-database&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;bigdata_policy_rt&#x27;</span>,<br>    <span class="hljs-string">&#x27;hive-conf-dir&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;/etc/hive/conf&#x27;</span><br>);<br><br>USE CATALOG kafka;<br>USE CATALOG starrocks;<br><br><span class="hljs-comment">-- 去重</span><br><span class="hljs-keyword">CREATE</span><br>TEMPORARY <span class="hljs-keyword">VIEW</span> IF <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> view_user_events <span class="hljs-keyword">AS</span><br><span class="hljs-keyword">SELECT</span> IFNULL(`currCreditCode`, <span class="hljs-string">&#x27;&#x27;</span>)  <span class="hljs-keyword">AS</span> `credit_code`,<br>       IFNULL(`currCompanyName`, <span class="hljs-string">&#x27;&#x27;</span>) <span class="hljs-keyword">AS</span> `company_name`,<br>       `internal_event_code`,<br>       `internal_event_name`,<br>       IFNULL(`user_id`, <span class="hljs-string">&#x27;&#x27;</span>)         <span class="hljs-keyword">AS</span> `user_id`,<br>       IFNULL(`phone`, <span class="hljs-string">&#x27;&#x27;</span>)           <span class="hljs-keyword">AS</span> `phone_number`,<br>       `<span class="hljs-type">time</span>`,<br>       TO_DATE(FROM_UNIXTIME(<span class="hljs-built_in">CAST</span>(`<span class="hljs-type">time</span>` <span class="hljs-keyword">AS</span> <span class="hljs-type">BIGINT</span>) <span class="hljs-operator">/</span> <span class="hljs-number">1000</span>)) <span class="hljs-keyword">AS</span> `<span class="hljs-type">date</span>`<br><span class="hljs-keyword">FROM</span> <span class="hljs-keyword">TABLE</span>(<br>        TUMBLE(<span class="hljs-keyword">TABLE</span> kafka.bigdata_policy_rt.dwd_pol_kafka_portrait_action_info, DESCRIPTOR(proc_time), <span class="hljs-type">INTERVAL</span> <span class="hljs-string">&#x27;60&#x27;</span> seconds))<br><span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> `currCreditCode`, `currCompanyName`, `internal_event_code`, `internal_event_name`, `user_id`, `phone`, `<span class="hljs-type">time</span>`;<br><br><br><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> `starrocks`.`bigdata_policy_rt`.`dwd_pol_user_events`<br><span class="hljs-keyword">SELECT</span> `credit_code`,<br>       `internal_event_code`,<br>       `user_id`,<br>       `phone_number`,<br>       TO_DATE(FROM_UNIXTIME(<span class="hljs-built_in">CAST</span>(`<span class="hljs-type">time</span>` <span class="hljs-keyword">AS</span> <span class="hljs-type">BIGINT</span>) <span class="hljs-operator">/</span> <span class="hljs-number">1000</span>)) <span class="hljs-keyword">AS</span> `<span class="hljs-type">date</span>`<br><span class="hljs-keyword">FROM</span> view_user_events<br><span class="hljs-keyword">WHERE</span> `<span class="hljs-type">date</span>` <span class="hljs-operator">&gt;=</span> <span class="hljs-string">&#x27;2023-08-07&#x27;</span>;<br><br><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> `kafka`.`bigdata_policy_rt`.`dwd_pol_kafka_clue_user_events`<br><span class="hljs-keyword">SELECT</span> `credit_code`,<br>       `company_name`,<br>       `internal_event_code`,<br>       `internal_event_name`,<br>       `user_id`,<br>       `phone_number`,<br>       `<span class="hljs-type">time</span>`<br><span class="hljs-keyword">FROM</span> view_user_events<br><span class="hljs-keyword">WHERE</span> `<span class="hljs-type">date</span>` <span class="hljs-operator">&gt;=</span> <span class="hljs-string">&#x27;2023-08-07&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<h3 id="③-号Flink-任务"><a href="#③-号Flink-任务" class="headerlink" title="③ 号Flink 任务"></a>③ 号Flink 任务</h3><p>任务配置：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs text">-p 1 -Dtaskmanager.numberOfTaskSlots=1 -Dtaskmanager.memory.process.size=3072m<br></code></pre></td></tr></table></figure>
+<p>SQL：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SET</span> <span class="hljs-string">&#x27;pipeline.global-job-parameters&#x27;</span><span class="hljs-operator">=</span><span class="hljs-string">&#x27;env:prod&#x27;</span>;<br><br><span class="hljs-keyword">CREATE</span> CATALOG kafka <span class="hljs-keyword">WITH</span> (<br>    <span class="hljs-string">&#x27;type&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;hive&#x27;</span>,<br>    <span class="hljs-string">&#x27;default-database&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;bigdata_policy_rt&#x27;</span>,<br>    <span class="hljs-string">&#x27;hive-conf-dir&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;/etc/hive/conf&#x27;</span><br>);<br><br><span class="hljs-keyword">CREATE</span> CATALOG mysql <span class="hljs-keyword">WITH</span> (<br>    <span class="hljs-string">&#x27;type&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;hive&#x27;</span>,<br>    <span class="hljs-string">&#x27;default-database&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;bigdata_policy_rt&#x27;</span>,<br>    <span class="hljs-string">&#x27;hive-conf-dir&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;/etc/hive/conf&#x27;</span><br>);<br><br><span class="hljs-keyword">CREATE</span> CATALOG starrocks <span class="hljs-keyword">WITH</span> (<br>    <span class="hljs-string">&#x27;type&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;hive&#x27;</span>,<br>    <span class="hljs-string">&#x27;default-database&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;bigdata_policy_rt&#x27;</span>,<br>    <span class="hljs-string">&#x27;hive-conf-dir&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;/etc/hive/conf&#x27;</span><br>);<br><br>USE CATALOG kafka;<br>USE CATALOG mysql;<br>USE CATALOG starrocks;<br><br><br><span class="hljs-keyword">CREATE</span> TEMPORARY <span class="hljs-keyword">FUNCTION</span> EventSum <span class="hljs-keyword">AS</span> <span class="hljs-string">&#x27;xxx.EventSum&#x27;</span>;<br><span class="hljs-keyword">CREATE</span> TEMPORARY <span class="hljs-keyword">FUNCTION</span> ExtractPhoneNumbers <span class="hljs-keyword">AS</span> <span class="hljs-string">&#x27;xxx.ExtractPhoneNumbers&#x27;</span>;<br><br><span class="hljs-keyword">CREATE</span> TEMPORARY <span class="hljs-keyword">VIEW</span> IF <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> view_company_event_info <span class="hljs-keyword">AS</span><br><span class="hljs-keyword">SELECT</span> `credit_code`,<br>       `company_name`,<br>       `internal_event_code`,<br>       `internal_event_name`,<br>       `user_id`,<br>       `phone_number`,<br>       `<span class="hljs-type">time</span>`<br><span class="hljs-keyword">FROM</span> <span class="hljs-keyword">TABLE</span>(<br>        TUMBLE(<span class="hljs-keyword">TABLE</span> `kafka`.`bigdata_policy_rt`.`dwd_pol_kafka_clue_user_events`, DESCRIPTOR(proc_time), <span class="hljs-type">INTERVAL</span> <span class="hljs-string">&#x27;60&#x27;</span> seconds))<br><span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> `credit_code`,<br>         `company_name`,<br>         `internal_event_code`,<br>         `internal_event_name`,<br>         `user_id`,<br>         `phone_number`,<br>         `<span class="hljs-type">time</span>`;<br><br><span class="hljs-comment">-- 筛选出触发了阈值和未创建线索的企业</span><br><span class="hljs-keyword">CREATE</span> TEMPORARY <span class="hljs-keyword">VIEW</span> IF <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> view_clue_trigger_company <span class="hljs-keyword">AS</span><br><span class="hljs-keyword">SELECT</span> t1.credit_code,<br>       t1.company_name,<br>       t1.internal_event_code,<br>       t1.internal_event_name,<br>       t1.event_sum <span class="hljs-keyword">AS</span> event_trigger_num,<br>       t1.proc_time<br><span class="hljs-keyword">FROM</span> (<br>         <span class="hljs-keyword">SELECT</span><br>             credit_code,<br>             company_name,<br>             internal_event_code,<br>             internal_event_name,<br>             EventSum(credit_code, internal_event_code) <span class="hljs-keyword">AS</span> event_sum,<br>             PROCTIME() <span class="hljs-keyword">AS</span> proc_time<br>         <span class="hljs-keyword">FROM</span> view_company_event_info<br>     ) t1<br><span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> `mysql`.`bigdata_policy_rt`.`dim_pol_clue_event_threshold` <span class="hljs-comment">/*+ OPTIONS(&#x27;lookup.cache&#x27;=&#x27;PARTIAL&#x27;, &#x27;lookup.cache.max-rows&#x27;=&#x27;5000&#x27;, &#x27;lookup.cache.ttl&#x27;=&#x27;10m&#x27;, &#x27;lookup.partial-cache.expire-after-write&#x27;=&#x27;10m&#x27;, &#x27;lookup.partial-cache.expire-after-access&#x27;=&#x27;10m&#x27;) */</span> <span class="hljs-keyword">FOR</span> <span class="hljs-built_in">SYSTEM_TIME</span> <span class="hljs-keyword">AS</span> <span class="hljs-keyword">OF</span> t1.proc_time <span class="hljs-keyword">AS</span> t2<br><span class="hljs-keyword">ON</span> t1.internal_event_code <span class="hljs-operator">=</span> t2.internal_event_code<br><span class="hljs-keyword">WHERE</span> t2.internal_event_code <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">null</span> <span class="hljs-keyword">and</span> t1.event_sum <span class="hljs-operator">&gt;=</span> t2.threshold_num;<br><br><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> `mysql`.`bigdata_policy_rt`.`dwd_pol_clue_trigger_info`<br><span class="hljs-keyword">SELECT</span> credit_code,<br>       company_name,<br>       ExtractPhoneNumbers(credit_code, internal_event_code) <span class="hljs-keyword">AS</span> phone_numbers,<br>       internal_event_code,<br>       internal_event_name,<br>       event_trigger_num<br><span class="hljs-keyword">FROM</span> (<br>         <span class="hljs-keyword">SELECT</span> t1.credit_code,<br>                t1.company_name,<br>                t1.internal_event_code,<br>                t1.internal_event_name,<br>                t1.event_trigger_num<br>         <span class="hljs-keyword">FROM</span> view_clue_trigger_company t1<br>                  <span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> `mysql`.`bigdata_policy_rt`.`dwd_pol_clue_trigger_info` <span class="hljs-keyword">FOR</span> <span class="hljs-built_in">SYSTEM_TIME</span> <span class="hljs-keyword">AS</span> <span class="hljs-keyword">OF</span> t1.proc_time <span class="hljs-keyword">AS</span> t2<br>                            <span class="hljs-keyword">ON</span> t1.credit_code <span class="hljs-operator">=</span> t2.credit_code<br>         <span class="hljs-keyword">WHERE</span> t2.credit_code <span class="hljs-keyword">IS</span> <span class="hljs-keyword">NULL</span><br>     ) t3;<br></code></pre></td></tr></table></figure>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Flink-%E5%AE%9E%E6%97%B6%E9%A1%B9%E7%9B%AE/" class="category-chain-item">Flink 实时项目</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Flink-StarRocks/" class="print-no-link">#Flink + StarRocks</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Flink + StarRocks -- 用户行为挖掘与线索推荐</div>
+      <div>http://example.com/2023/08/22/project/Flink + StarRocks -- 用户行为挖掘与线索推荐/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Liu Jun</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年8月22日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/" title="Flink 错误排查 -- Elasticsearch Sink - java.lang.OutOfMemoryError Direct buffer memory">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Flink 错误排查 -- Elasticsearch Sink - java.lang.OutOfMemoryError Direct buffer memory</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
