@@ -229,14 +229,14 @@
           <i class="index-pin iconfont icon-top" title="Pin on top"></i>
         
         <a href="/2023/09/27/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20SQL%20%E5%AF%B9%20CDC%20%E6%95%B0%E6%8D%AE%E6%BA%90%E5%81%9A%E7%BB%9F%E8%AE%A1%E7%BB%93%E6%9E%9C%E9%94%99%E8%AF%AF/" target="_self">
-          Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误
+          Flink 错误排查 -- Flink SQL 统计 CDC 数据源结果错误
         </a>
       </h2>
 
       
       <a class="index-excerpt index-excerpt__noimg" href="/2023/09/27/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20SQL%20%E5%AF%B9%20CDC%20%E6%95%B0%E6%8D%AE%E6%BA%90%E5%81%9A%E7%BB%9F%E8%AE%A1%E7%BB%93%E6%9E%9C%E9%94%99%E8%AF%AF/" target="_self">
         <div>
-          问题描述在对 CDC 数据源的数值类型做统计操作时，发现结果与预期结果不一致。 问题原因与解决方案将参数 table.exec.source.cdc-events-duplicate 设置为 true。 原因： 表示作业中的CDC（变更数据捕获）源是否会产生重复的变更事件，这些事件要求框架消除重复并获得一致的结果。CDC源是指生成完整更改事件的源， 包括INSERT&#x2F;UPDATE_BEF
+          问题描述在对 CDC 数据源的数值类型做统计操作（SUM、COUNT）时，发现结果与预期结果不一致。 问题原因与解决方案将参数 table.exec.source.cdc-events-duplicate 设置为 true。 原因： 表示作业中的CDC（变更数据捕获）源是否会产生重复的变更事件，这些事件要求框架消除重复并获得一致的结果。CDC源是指生成完整更改事件的源， 包括INSERT&#x2F
         </div>
       </a>
 

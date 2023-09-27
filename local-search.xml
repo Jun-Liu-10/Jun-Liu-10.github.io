@@ -4,11 +4,11 @@
   
   
   <entry>
-    <title>Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误</title>
+    <title>Flink 错误排查 -- Flink SQL 统计 CDC 数据源结果错误</title>
     <link href="/2023/09/27/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20SQL%20%E5%AF%B9%20CDC%20%E6%95%B0%E6%8D%AE%E6%BA%90%E5%81%9A%E7%BB%9F%E8%AE%A1%E7%BB%93%E6%9E%9C%E9%94%99%E8%AF%AF/"/>
     <url>/2023/09/27/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20SQL%20%E5%AF%B9%20CDC%20%E6%95%B0%E6%8D%AE%E6%BA%90%E5%81%9A%E7%BB%9F%E8%AE%A1%E7%BB%93%E6%9E%9C%E9%94%99%E8%AF%AF/</url>
     
-    <content type="html"><![CDATA[<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在对 CDC 数据源的数值类型做统计操作时，发现结果与预期结果不一致。</p><h2 id="问题原因与解决方案"><a href="#问题原因与解决方案" class="headerlink" title="问题原因与解决方案"></a>问题原因与解决方案</h2><p>将参数 <strong>table.exec.source.cdc-events-duplicate</strong> 设置为 <strong>true</strong>。</p><p>原因：</p><p>表示作业中的CDC（变更数据捕获）源是否会产生重复的变更事件，这些事件要求框架消除重复并获得一致的结果。CDC源是指生成完整更改事件的源，</p><p>包括INSERT&#x2F;UPDATE_BEFORE&#x2F;UPDATE_AFTER&#x2F;DELETE，例如Debezium格式的Kafka源。默认情况下，此配置的值为false。 </p><p>但是，常见的情况是存在重复的更改事件。因为通常情况下，当发生故障切换时，CDC工具（例如Debezium）至少在一次交付中工作。因此，在异常情况下，Debezium可能会向Kafka传递重复的更改事件，Flink将获得重复的事件。</p><p>这可能会导致Flink查询得到错误的结果或意外的异常。 因此，如果您的CDC工具至少交付一次，建议打开此配置。启用此配置需要在CDC源上定义PRIMARY KEY。主键将用于消除重复的更改事件，并生成标准化的更改日志流，但需要额外的有状态运算符。</p><p>会生成一个 ChangelogNormalize 状态算子来生成完整的 changelog：</p><p><img src="/img/flink/flink-cdc-events-duplicate.png"><br><img src="/img/flink/flink-cdc-events-duplicate-1.png"></p>]]></content>
+    <content type="html"><![CDATA[<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在对 CDC 数据源的数值类型做统计操作（SUM、COUNT）时，发现结果与预期结果不一致。</p><h2 id="问题原因与解决方案"><a href="#问题原因与解决方案" class="headerlink" title="问题原因与解决方案"></a>问题原因与解决方案</h2><p>将参数 <strong>table.exec.source.cdc-events-duplicate</strong> 设置为 <strong>true</strong>。</p><p>原因：</p><p>表示作业中的CDC（变更数据捕获）源是否会产生重复的变更事件，这些事件要求框架消除重复并获得一致的结果。CDC源是指生成完整更改事件的源，</p><p>包括INSERT&#x2F;UPDATE_BEFORE&#x2F;UPDATE_AFTER&#x2F;DELETE，例如Debezium格式的Kafka源。默认情况下，此配置的值为false。 </p><p>但是，常见的情况是存在重复的更改事件。因为通常情况下，当发生故障切换时，CDC工具（例如Debezium）至少在一次交付中工作。因此，在异常情况下，Debezium可能会向Kafka传递重复的更改事件，Flink将获得重复的事件。</p><p>这可能会导致Flink查询得到错误的结果或意外的异常。 因此，如果您的CDC工具至少交付一次，建议打开此配置。启用此配置需要在CDC源上定义PRIMARY KEY。主键将用于消除重复的更改事件，并生成标准化的更改日志流，但需要额外的有状态运算符。</p><p>会生成一个 ChangelogNormalize 状态算子来生成完整的 changelog：</p><p><img src="/img/flink/flink-cdc-events-duplicate.png"><br><img src="/img/flink/flink-cdc-events-duplicate-1.png"></p>]]></content>
     
     
     <categories>
