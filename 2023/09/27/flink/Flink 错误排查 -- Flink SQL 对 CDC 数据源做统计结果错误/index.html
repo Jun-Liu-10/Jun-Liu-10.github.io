@@ -16,31 +16,27 @@
   <meta name="author" content="Liu Jun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="Prometheus + PushGateway + Grafana 是一套常用的监控 Flink metrics 的组合。网上有很多实践，这里就不赘述了。但是在使用的过程中还是遇到了一下问题。 问题描述如果一个任务有多个 taskmanager ，dashboard 上 taskmanager 相关的指标则是断断续续的，如图所示： 导致 metrics 断断续续的另外一个原因：Flink问题：记">
+    <meta name="description" content="问题描述在对 CDC 数据源的数值类型做统计操作时，发现结果与预期结果不一致。 问题原因与解决方案将参数 table.exec.source.cdc-events-duplicate 设置为 true。 原因： 表示作业中的CDC（变更数据捕获）源是否会产生重复的变更事件，这些事件要求框架消除重复并获得一致的结果。CDC源是指生成完整更改事件的源， 包括INSERT&#x2F;UPDATE_BEF">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Flink 错误排查 -- Flink metrics 指标断断续续 - Prometheus + PushGateway + Grafana">
-<meta property="og:url" content="http://example.com/2023/09/20/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20metrics%20%E6%8C%87%E6%A0%87%E6%96%AD%E6%96%AD%E7%BB%AD%E7%BB%AD/index.html">
+<meta property="og:title" content="Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误">
+<meta property="og:url" content="http://example.com/2023/09/27/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20SQL%20%E5%AF%B9%20CDC%20%E6%95%B0%E6%8D%AE%E6%BA%90%E5%81%9A%E7%BB%9F%E8%AE%A1%E7%BB%93%E6%9E%9C%E9%94%99%E8%AF%AF/index.html">
 <meta property="og:site_name" content="ACMAN">
-<meta property="og:description" content="Prometheus + PushGateway + Grafana 是一套常用的监控 Flink metrics 的组合。网上有很多实践，这里就不赘述了。但是在使用的过程中还是遇到了一下问题。 问题描述如果一个任务有多个 taskmanager ，dashboard 上 taskmanager 相关的指标则是断断续续的，如图所示： 导致 metrics 断断续续的另外一个原因：Flink问题：记">
+<meta property="og:description" content="问题描述在对 CDC 数据源的数值类型做统计操作时，发现结果与预期结果不一致。 问题原因与解决方案将参数 table.exec.source.cdc-events-duplicate 设置为 true。 原因： 表示作业中的CDC（变更数据捕获）源是否会产生重复的变更事件，这些事件要求框架消除重复并获得一致的结果。CDC源是指生成完整更改事件的源， 包括INSERT&#x2F;UPDATE_BEF">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/flink/flink-taskmanager-dashboard.png">
-<meta property="og:image" content="http://example.com/img/flink/flink-metrics-1.png">
-<meta property="og:image" content="http://example.com/img/flink/flink-metrics-2.png">
-<meta property="og:image" content="http://example.com/img/flink/flink-metrics-3.png">
-<meta property="og:image" content="http://example.com/img/flink/flink-metrics-4.png">
-<meta property="og:image" content="http://example.com/img/flink/flink-metrics-5.png">
-<meta property="article:published_time" content="2023-09-20T01:14:01.000Z">
-<meta property="article:modified_time" content="2023-09-20T02:34:28.885Z">
+<meta property="og:image" content="http://example.com/img/flink/flink-cdc-events-duplicate.png">
+<meta property="og:image" content="http://example.com/img/flink/flink-cdc-events-duplicate-1.png">
+<meta property="article:published_time" content="2023-09-27T01:14:10.000Z">
+<meta property="article:modified_time" content="2023-09-27T02:04:53.425Z">
 <meta property="article:author" content="Liu Jun">
 <meta property="article:tag" content="Flink">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/flink/flink-taskmanager-dashboard.png">
+<meta name="twitter:image" content="http://example.com/img/flink/flink-cdc-events-duplicate.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Flink 错误排查 -- Flink metrics 指标断断续续 - Prometheus + PushGateway + Grafana - ACMAN</title>
+  <title>Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误 - ACMAN</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -206,7 +202,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Flink 错误排查 -- Flink metrics 指标断断续续 - Prometheus + PushGateway + Grafana"></span>
+            <span id="subtitle" data-typed-text="Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误"></span>
           
         </div>
 
@@ -217,8 +213,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-09-20 09:14" pubdate>
-          2023年9月20日 上午
+        <time datetime="2023-09-27 09:14" pubdate>
+          2023年9月27日 上午
         </time>
       </span>
     
@@ -229,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.4k 字
+          542 字
         
       </span>
     
@@ -240,7 +236,7 @@
         
         
         
-          12 分钟
+          5 分钟
         
       </span>
     
@@ -285,20 +281,20 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">Flink 错误排查 -- Flink metrics 指标断断续续 - Prometheus + PushGateway + Grafana</h1>
+            <h1 id="seo-header">Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误</h1>
             
             
               <div class="markdown-body">
                 
-                <p>Prometheus + PushGateway + Grafana 是一套常用的监控 Flink metrics 的组合。网上有很多实践，这里就不赘述了。但是在使用的过程中还是遇到了一下问题。</p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>如果一个任务有多个 taskmanager ，dashboard 上 taskmanager 相关的指标则是断断续续的，如图所示：<br><img src="/img/flink/flink-taskmanager-dashboard.png" srcset="/img/loading.gif" lazyload></p>
-<p>导致 metrics 断断续续的另外一个原因：<a target="_blank" rel="noopener" href="https://blog.csdn.net/daijiguo/article/details/105453643">Flink问题：记Flink Metrics时断时续问题排查</a>；不过我已经将 push 方法改成 pushAdd 方法之后重新打包。</p>
-<p>当前 PushGateway 相关的一些配置：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql">metrics.reporter.promgateway.factory.class: org.apache.flink.metrics.prometheus.PrometheusPushGatewayReporterFactory<br>metrics.reporter.promgateway.hostUrl: http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>xxxx:<span class="hljs-number">9091</span><br>metrics.reporter.promgateway.randomJobNameSuffix: <span class="hljs-literal">false</span><br>metrics.reporter.promgateway.deleteOnShutdown: <span class="hljs-literal">true</span><br>metrics.reporter.promgateway.interval: <span class="hljs-number">30</span>s<br>metrics.reporter.promgateway.groupingKey: type<span class="hljs-operator">=</span>flink;env<span class="hljs-operator">=</span>test<br>metrics.reporter.promgateway.jobName: xxx <span class="hljs-comment">-- 提交任务的时候动态配置</span><br></code></pre></td></tr></table></figure>
-
-<h2 id="问题原因"><a href="#问题原因" class="headerlink" title="问题原因"></a>问题原因</h2><p>PushGateway 是按照 jobName、groupingKey 和 metric_name 更新数据的，测试：<br><img src="/img/flink/flink-metrics-1.png" srcset="/img/loading.gif" lazyload><br><img src="/img/flink/flink-metrics-2.png" srcset="/img/loading.gif" lazyload><br>可以发现在 jobName &#x3D; my_job、groupingKey &#x3D; type&#x3D;flink;env&#x3D;test、metric_name &#x3D; my_custom_metrics 的情况下，上报了两次指标，<br>第一次为 tm_id&#x3D;”container_e64_1691562725918_0295_01_000001” 的指标；<br>第二次为 tm_id&#x3D;”container_e64_1691562725918_0295_01_000002” 的指标；<br>但是第二次的指标直接把第一次的覆盖了，所以在多个 taskmanager 的情况下，同一个指标会相互覆盖，出现指标断断续续的情况。</p>
-<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><p>将 <strong>metrics.reporter.promgateway.randomJobNameSuffix</strong> 设置为 true，这样每个 container（jobmanager、taskmanager） 在 jobName 之后会加上一个随机后缀（如下图所示），<br>同时在 <strong>metrics.reporter.promgateway.groupingKey</strong> 在加上一个 <strong>job_name&#x3D;xxx</strong> 的 key，可以看到 PushGateway 上每个 container 都会生成一个 group，不会再出现不同 taskmanager 的同一个 metric 相互覆盖的情况。<br><img src="/img/flink/flink-metrics-3.png" srcset="/img/loading.gif" lazyload></p>
-<p>在 Grafana Dashboard 中我们可以通过 groupingKey 中加上的 job_name&#x3D;xxx 进行分类筛选：<br><img src="/img/flink/flink-metrics-4.png" srcset="/img/loading.gif" lazyload><br><img src="/img/flink/flink-metrics-5.png" srcset="/img/loading.gif" lazyload></p>
+                <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>在对 CDC 数据源的数值类型做统计操作时，发现结果与预期结果不一致。</p>
+<h2 id="问题原因与解决方案"><a href="#问题原因与解决方案" class="headerlink" title="问题原因与解决方案"></a>问题原因与解决方案</h2><p>将参数 <strong>table.exec.source.cdc-events-duplicate</strong> 设置为 <strong>true</strong>。</p>
+<p>原因：</p>
+<p>表示作业中的CDC（变更数据捕获）源是否会产生重复的变更事件，这些事件要求框架消除重复并获得一致的结果。CDC源是指生成完整更改事件的源，</p>
+<p>包括INSERT&#x2F;UPDATE_BEFORE&#x2F;UPDATE_AFTER&#x2F;DELETE，例如Debezium格式的Kafka源。默认情况下，此配置的值为false。 </p>
+<p>但是，常见的情况是存在重复的更改事件。因为通常情况下，当发生故障切换时，CDC工具（例如Debezium）至少在一次交付中工作。因此，在异常情况下，Debezium可能会向Kafka传递重复的更改事件，Flink将获得重复的事件。</p>
+<p>这可能会导致Flink查询得到错误的结果或意外的异常。 因此，如果您的CDC工具至少交付一次，建议打开此配置。启用此配置需要在CDC源上定义PRIMARY KEY。主键将用于消除重复的更改事件，并生成标准化的更改日志流，但需要额外的有状态运算符。</p>
+<p>会生成一个 ChangelogNormalize 状态算子来生成完整的 changelog：</p>
+<p><img src="/img/flink/flink-cdc-events-duplicate.png" srcset="/img/loading.gif" lazyload><br><img src="/img/flink/flink-cdc-events-duplicate-1.png" srcset="/img/loading.gif" lazyload></p>
 
                 
               </div>
@@ -344,8 +340,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Flink 错误排查 -- Flink metrics 指标断断续续 - Prometheus + PushGateway + Grafana</div>
-      <div>http://example.com/2023/09/20/flink/Flink 错误排查 -- Flink metrics 指标断断续续/</div>
+      <div>Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误</div>
+      <div>http://example.com/2023/09/27/flink/Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误/</div>
     </div>
     <div class="license-meta">
       
@@ -357,7 +353,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年9月20日</div>
+          <div>2023年9月27日</div>
         </div>
       
       
@@ -389,18 +385,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/09/27/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20SQL%20%E5%AF%B9%20CDC%20%E6%95%B0%E6%8D%AE%E6%BA%90%E5%81%9A%E7%BB%9F%E8%AE%A1%E7%BB%93%E6%9E%9C%E9%94%99%E8%AF%AF/" title="Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Flink 错误排查 -- Flink SQL 对 CDC 数据源做统计结果错误</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/08/22/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E5%90%91%20UDF%20%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0/" title="Flink 基础学习 -- 如何向 UDF 传递参数">
-                        <span class="hidden-mobile">Flink 基础学习 -- 如何向 UDF 传递参数</span>
+                      <a href="/2023/09/20/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20metrics%20%E6%8C%87%E6%A0%87%E6%96%AD%E6%96%AD%E7%BB%AD%E7%BB%AD/" title="Flink 错误排查 -- Flink metrics 指标断断续续 - Prometheus + PushGateway + Grafana">
+                        <span class="hidden-mobile">Flink 错误排查 -- Flink metrics 指标断断续续 - Prometheus + PushGateway + Grafana</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
