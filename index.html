@@ -236,7 +236,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/2023/09/27/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Flink%20SQL%20%E5%AF%B9%20CDC%20%E6%95%B0%E6%8D%AE%E6%BA%90%E5%81%9A%E7%BB%9F%E8%AE%A1%E7%BB%93%E6%9E%9C%E9%94%99%E8%AF%AF/" target="_self">
         <div>
-          问题描述在对 CDC 数据源的数值类型做统计操作（SUM、COUNT）时，发现结果与预期结果不一致。 问题原因与解决方案将参数 table.exec.source.cdc-events-duplicate 设置为 true。 原因： 表示作业中的CDC（变更数据捕获）源是否会产生重复的变更事件，这些事件要求框架消除重复并获得一致的结果。CDC源是指生成完整更改事件的源， 包括INSERT&#x2F
+          1 问题描述在对 CDC 数据源的数值类型做统计操作（SUM、COUNT）时，发现结果与预期结果不一致。 2 问题原因与解决方案将参数 table.exec.source.cdc-events-duplicate 设置为 true。 原因： 表示作业中的CDC（变更数据捕获）源是否会产生重复的变更事件，这些事件要求框架消除重复并获得一致的结果。CDC源是指生成完整更改事件的源， 包括INSERT&
         </div>
       </a>
 
@@ -362,7 +362,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/2023/08/22/flink/Flink%20%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5%20--%20Elasticsearch%20Sink%EF%BC%9Ajava.lang.OutOfMemoryError:%20Direct%20buffer%20memory/" target="_self">
         <div>
-          问题描述背景：近期上线了一个写 es 的 flink 任务，但是任务一直重启，然后进到 taskmanager 的日志找到了报错信息： 问题原因因为写 es 的时候会把数据缓存在 直接内存（Direct Memory）&#x2F; 堆外内存 中，由报错信息可以看出，由于数据量比较大导致直接内存 OutOfMemory。 解决办法由 taskmanager 的内存模型来看，Direct Memory
+          1 问题描述背景：近期上线了一个写 es 的 flink 任务，但是任务一直重启，然后进到 taskmanager 的日志找到了报错信息： 2 问题原因因为写 es 的时候会把数据缓存在 直接内存（Direct Memory）&#x2F; 堆外内存 中，由报错信息可以看出，由于数据量比较大导致直接内存 OutOfMemory。 3 解决办法由 taskmanager 的内存模型来看，Direct
         </div>
       </a>
 
@@ -387,6 +387,69 @@
       <span class="category-chain">
         
   <a href="/categories/Flink-%E9%94%99%E8%AF%AF%E6%8E%92%E6%9F%A5/" class="category-chain-item">Flink 错误排查</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Flink/">#Flink</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
+        <a href="/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E5%AE%9E%E6%97%B6%E6%8C%87%E6%A0%87%E7%9A%84%E8%B4%A8%E9%87%8F/" target="_self">
+          Flink 基础学习 -- 如何保障实时指标的质量
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E5%AE%9E%E6%97%B6%E6%8C%87%E6%A0%87%E7%9A%84%E8%B4%A8%E9%87%8F/" target="_self">
+        <div>
+          可以从事前、事中、事后三个时间的任务层面、指标层面去看： 1 事前 任务层面：根据峰值流量进行压力测试，并且保留一定buffer，保障任务在资源层面没有瓶颈； 指标层面：根据业务需求，上线实时任务前，在相同的口径下对实时指标和离线指标进行对比，在实时指标的误差不超过业务阈值时，才能上线。  2 事中 任务层面：贴源层监控 Kafka 堆积延迟等报警检测手段，用于事中及时发现问题。比如：用 Prom
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-09-27 13:14" pubdate>
+              2023-09-27
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Flink-%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" class="category-chain-item">Flink 基础学习</a>
   
   
 
@@ -488,7 +551,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/2023/08/22/project/Flink%20+%20StarRocks%20--%20%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA%E6%8C%96%E6%8E%98%E4%B8%8E%E7%BA%BF%E7%B4%A2%E6%8E%A8%E8%8D%90/" target="_self">
         <div>
-          背景用户在我们官网上或者是APP上会各种各样的操作行为，其中有几种典型的行为是值得做商机挖掘的，比如搜索并点击、浏览、加入购物车等等，希望大数据可以抓取过来，记载到这个客户名下，作为与客户沟通的信息谈资，同时做数据挖掘，自动推送线索到线上、线下团队，提高商机转化率。 需求根据需求我们需要筛选出过去180天满足线索规则的用户，比如：过去180天内浏览该商品超过10次，则符合要求；规则是按照公司和行为
+          1 背景用户在我们官网上或者是APP上会各种各样的操作行为，其中有几种典型的行为是值得做商机挖掘的，比如搜索并点击、浏览、加入购物车等等，希望大数据可以抓取过来，记载到这个客户名下，作为与客户沟通的信息谈资，同时做数据挖掘，自动推送线索到线上、线下团队，提高商机转化率。 2 需求根据需求我们需要筛选出过去180天满足线索规则的用户，比如：过去180天内浏览该商品超过10次，则符合要求；规则是按照公
         </div>
       </a>
 
