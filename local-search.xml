@@ -4,6 +4,31 @@
   
   
   <entry>
+    <title>JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发</title>
+    <link href="/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/"/>
+    <url>/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/</url>
+    
+    <content type="html"><![CDATA[<h2 id="1-背景-需求"><a href="#1-背景-需求" class="headerlink" title="1 背景 &amp; 需求"></a>1 背景 &amp; 需求</h2><p>最近工作中遇到了一个场景：需要将多个 zip 包中的文件解压之后上传到 hdfs，串行解压上传的速度非常慢；需要改造成并行执行。</p><h2 id="2-实现：CompletableFuture-自定义线程池"><a href="#2-实现：CompletableFuture-自定义线程池" class="headerlink" title="2 实现：CompletableFuture + 自定义线程池"></a>2 实现：CompletableFuture + 自定义线程池</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Slf4j</span><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DataCheck</span> &#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获取当前机器的核心数</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">AVAILABLE_PROCESSORS</span> <span class="hljs-operator">=</span> Runtime.getRuntime().availableProcessors();<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ThreadPoolExecutor</span> <span class="hljs-variable">THREAD_POOL_EXECUTOR</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>(<br>            <span class="hljs-number">2</span> * AVAILABLE_PROCESSORS,<br>            <span class="hljs-number">4</span> * AVAILABLE_PROCESSORS,<br>            <span class="hljs-number">3</span>, TimeUnit.SECONDS,<br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">LinkedBlockingDeque</span>&lt;&gt;(<span class="hljs-number">1024</span>),<br>            Executors.defaultThreadFactory(),<br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>.AbortPolicy());<br><br>    <span class="hljs-meta">@Scheduled(cron = &quot;0 */1 * * * ?&quot;)</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">upload</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 1 获取 check_status = 1 的目录</span><br>        List&lt;FileCheckLog&gt; fileCheckLogs = xxx;<br>        List&lt;CompletableFuture&lt;Void&gt;&gt; futures = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>        <span class="hljs-keyword">for</span> (FileCheckLog fileCheckLog : fileCheckLogs) &#123;<br>            CompletableFuture&lt;Void&gt; future = CompletableFuture.runAsync(() -&gt; &#123;<br>                <span class="hljs-comment">// ... ...</span><br>            &#125;, THREAD_POOL_EXECUTOR);<br>            futures.add(future);<br>        &#125;<br>        CompletableFuture.allOf(futures.toArray(<span class="hljs-keyword">new</span> <span class="hljs-title class_">CompletableFuture</span>[<span class="hljs-number">0</span>])).join();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    <categories>
+      
+      <category>JAVA 基础</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Flink + StarRocks</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Flink 基础学习 -- 如何保障实时指标的质量</title>
     <link href="/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E5%AE%9E%E6%97%B6%E6%8C%87%E6%A0%87%E7%9A%84%E8%B4%A8%E9%87%8F/"/>
     <url>/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E5%AE%9E%E6%97%B6%E6%8C%87%E6%A0%87%E7%9A%84%E8%B4%A8%E9%87%8F/</url>
@@ -139,31 +164,6 @@
     <categories>
       
       <category>Flink 实时项目</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>Flink + StarRocks</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发</title>
-    <link href="/2023/08/22/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/"/>
-    <url>/2023/08/22/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/</url>
-    
-    <content type="html"><![CDATA[<h2 id="1-背景-需求"><a href="#1-背景-需求" class="headerlink" title="1 背景 &amp; 需求"></a>1 背景 &amp; 需求</h2><p>最近工作中遇到了一个场景：需要将多个 zip 包中的文件解压之后上传到 hdfs，串行解压上传的速度非常慢；需要改造成并行执行。</p><h2 id="2-实现：CompletableFuture-自定义线程池"><a href="#2-实现：CompletableFuture-自定义线程池" class="headerlink" title="2 实现：CompletableFuture + 自定义线程池"></a>2 实现：CompletableFuture + 自定义线程池</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Slf4j</span><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DataCheck</span> &#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获取当前机器的核心数</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">AVAILABLE_PROCESSORS</span> <span class="hljs-operator">=</span> Runtime.getRuntime().availableProcessors();<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ThreadPoolExecutor</span> <span class="hljs-variable">THREAD_POOL_EXECUTOR</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>(<br>            <span class="hljs-number">2</span> * AVAILABLE_PROCESSORS,<br>            <span class="hljs-number">4</span> * AVAILABLE_PROCESSORS,<br>            <span class="hljs-number">3</span>, TimeUnit.SECONDS,<br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">LinkedBlockingDeque</span>&lt;&gt;(<span class="hljs-number">1024</span>),<br>            Executors.defaultThreadFactory(),<br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>.AbortPolicy());<br><br>    <span class="hljs-meta">@Scheduled(cron = &quot;0 */1 * * * ?&quot;)</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">upload</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 1 获取 check_status = 1 的目录</span><br>        List&lt;FileCheckLog&gt; fileCheckLogs = xxx;<br>        List&lt;CompletableFuture&lt;Void&gt;&gt; futures = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>        <span class="hljs-keyword">for</span> (FileCheckLog fileCheckLog : fileCheckLogs) &#123;<br>            CompletableFuture&lt;Void&gt; future = CompletableFuture.runAsync(() -&gt; &#123;<br>                <span class="hljs-comment">// ... ...</span><br>            &#125;, THREAD_POOL_EXECUTOR);<br>            futures.add(future);<br>        &#125;<br>        CompletableFuture.allOf(futures.toArray(<span class="hljs-keyword">new</span> <span class="hljs-title class_">CompletableFuture</span>[<span class="hljs-number">0</span>])).join();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>]]></content>
-    
-    
-    <categories>
-      
-      <category>JAVA 基础</category>
       
     </categories>
     
