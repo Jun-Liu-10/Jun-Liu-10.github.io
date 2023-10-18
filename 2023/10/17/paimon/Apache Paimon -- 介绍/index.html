@@ -16,24 +16,29 @@
   <meta name="author" content="Liu Jun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="1 背景 &amp; 需求最近工作中遇到了一个场景：需要将多个 zip 包中的文件解压之后上传到 hdfs，串行解压上传的速度非常慢；需要改造成并行执行。 2 实现：CompletableFuture + 自定义线程池12345678910111213141516171819202122232425262728293031@Slf4j@Componentpublic class DataCheck">
+    <meta name="description" content="1 Flink Table Store 介绍从 Flink Table Store 演进⽽来，架构图如下：  （和今天 Paimon 的架构相⽐，Log System 不再被推荐使⽤，Lake Store 的能⼒⼤幅强于 Log System，除了延时） 2021 年 9 ⽉，发布了 0.2 版本，陆续有在⽣产使⽤。 Flink Table Store 是⼀个数据湖存储，⽤于实时流式 Change">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发">
-<meta property="og:url" content="http://example.com/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/index.html">
+<meta property="og:title" content="Apache Paimon -- 介绍">
+<meta property="og:url" content="http://example.com/2023/10/17/paimon/Apache%20Paimon%20--%20%E4%BB%8B%E7%BB%8D/index.html">
 <meta property="og:site_name" content="ACMAN">
-<meta property="og:description" content="1 背景 &amp; 需求最近工作中遇到了一个场景：需要将多个 zip 包中的文件解压之后上传到 hdfs，串行解压上传的速度非常慢；需要改造成并行执行。 2 实现：CompletableFuture + 自定义线程池12345678910111213141516171819202122232425262728293031@Slf4j@Componentpublic class DataCheck">
+<meta property="og:description" content="1 Flink Table Store 介绍从 Flink Table Store 演进⽽来，架构图如下：  （和今天 Paimon 的架构相⽐，Log System 不再被推荐使⽤，Lake Store 的能⼒⼤幅强于 Log System，除了延时） 2021 年 9 ⽉，发布了 0.2 版本，陆续有在⽣产使⽤。 Flink Table Store 是⼀个数据湖存储，⽤于实时流式 Change">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2023-10-07T02:14:12.000Z">
-<meta property="article:modified_time" content="2023-10-07T02:36:59.815Z">
+<meta property="og:image" content="http://example.com/img/paimon/flink-table-store.png">
+<meta property="og:image" content="http://example.com/img/paimon/paimon-2.png">
+<meta property="og:image" content="http://example.com/img/paimon/paimon-1.png">
+<meta property="og:image" content="http://example.com/img/paimon/paimon-3.png">
+<meta property="article:published_time" content="2023-10-17T05:14:12.000Z">
+<meta property="article:modified_time" content="2023-10-18T02:53:51.353Z">
 <meta property="article:author" content="Liu Jun">
-<meta property="article:tag" content="JAVA 基础">
+<meta property="article:tag" content="Apache Paimon">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/paimon/flink-table-store.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发 - ACMAN</title>
+  <title>Apache Paimon -- 介绍 - ACMAN</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -199,7 +204,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发"></span>
+            <span id="subtitle" data-typed-text="Apache Paimon -- 介绍"></span>
           
         </div>
 
@@ -210,8 +215,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-10-07 10:14" pubdate>
-          2023年10月7日 上午
+        <time datetime="2023-10-17 13:14" pubdate>
+          2023年10月17日 下午
         </time>
       </span>
     
@@ -222,7 +227,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1k 字
+          1.5k 字
         
       </span>
     
@@ -233,7 +238,7 @@
         
         
         
-          9 分钟
+          13 分钟
         
       </span>
     
@@ -278,15 +283,51 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发</h1>
+            <h1 id="seo-header">Apache Paimon -- 介绍</h1>
             
             
               <div class="markdown-body">
                 
-                <h2 id="1-背景-需求"><a href="#1-背景-需求" class="headerlink" title="1 背景 &amp; 需求"></a>1 背景 &amp; 需求</h2><p>最近工作中遇到了一个场景：需要将多个 zip 包中的文件解压之后上传到 hdfs，串行解压上传的速度非常慢；需要改造成并行执行。</p>
-<h2 id="2-实现：CompletableFuture-自定义线程池"><a href="#2-实现：CompletableFuture-自定义线程池" class="headerlink" title="2 实现：CompletableFuture + 自定义线程池"></a>2 实现：CompletableFuture + 自定义线程池</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Slf4j</span><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DataCheck</span> &#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获取当前机器的核心数</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">AVAILABLE_PROCESSORS</span> <span class="hljs-operator">=</span> Runtime.getRuntime().availableProcessors();<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ThreadPoolExecutor</span> <span class="hljs-variable">THREAD_POOL_EXECUTOR</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>(<br>            <span class="hljs-number">2</span> * AVAILABLE_PROCESSORS,<br>            <span class="hljs-number">4</span> * AVAILABLE_PROCESSORS,<br>            <span class="hljs-number">3</span>, TimeUnit.SECONDS,<br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">LinkedBlockingDeque</span>&lt;&gt;(<span class="hljs-number">1024</span>),<br>            Executors.defaultThreadFactory(),<br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>.AbortPolicy());<br><br>    <span class="hljs-meta">@Scheduled(cron = &quot;0 */1 * * * ?&quot;)</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">upload</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 1 获取 check_status = 1 的目录</span><br>        List&lt;FileCheckLog&gt; fileCheckLogs = xxx;<br>        List&lt;CompletableFuture&lt;Void&gt;&gt; futures = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>        <span class="hljs-keyword">for</span> (FileCheckLog fileCheckLog : fileCheckLogs) &#123;<br>            CompletableFuture&lt;Void&gt; future = CompletableFuture.runAsync(() -&gt; &#123;<br>                <span class="hljs-comment">// ... ...</span><br>            &#125;, THREAD_POOL_EXECUTOR);<br>            futures.add(future);<br>        &#125;<br>        CompletableFuture.allOf(futures.toArray(<span class="hljs-keyword">new</span> <span class="hljs-title class_">CompletableFuture</span>[<span class="hljs-number">0</span>])).join();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
-
-
+                <h2 id="1-Flink-Table-Store-介绍"><a href="#1-Flink-Table-Store-介绍" class="headerlink" title="1 Flink Table Store 介绍"></a>1 Flink Table Store 介绍</h2><p>从 Flink Table Store 演进⽽来，架构图如下：</p>
+<p><img src="/img/paimon/flink-table-store.png" srcset="/img/loading.gif" lazyload></p>
+<p>（和今天 Paimon 的架构相⽐，Log System 不再被推荐使⽤，Lake Store 的能⼒⼤幅强于 Log System，除了延时）</p>
+<p>2021 年 9 ⽉，发布了 0.2 版本，陆续有在⽣产使⽤。</p>
+<p>Flink Table Store 是⼀个数据湖存储，⽤于实时流式 Changelog 写⼊ (⽐如来⾃ Flink CDC 的数据) 和<br>⾼性能查询。它创新性的结合湖存储和 LSM 结构，深度对接 Flink，提供实时更新的系统设计，⽀撑⼤<br>吞吐量的更新数据摄取，同时提供良好的查询性能。</p>
+<p>0.3 形成了⼀个 Streaming Lakehouse 的基本雏形，我们可以⽐较⾃信的说出，0.3 可以推荐⽣产可⽤了。</p>
+<p>基于 Flink Table Store 不仅可以⽀持数据实时⼊湖，⽽且⽀持 Partial Update 等功能，帮助⽤户更灵活的在延迟和成本之间做均衡。<br><img src="/img/paimon/paimon-2.png" srcset="/img/loading.gif" lazyload></p>
+<p>解决问题：<br>1、Paimon 实时 CDC ⼊湖<br>2、Paimon 实时宽表与流读</p>
+<h2 id="2-Apache-Paimon"><a href="#2-Apache-Paimon" class="headerlink" title="2 Apache Paimon"></a>2 Apache Paimon</h2><p>在发布了三个版本后，虽然 Flink Table Store 具备了⼀定的成熟度，但作为 Flink 社区的⼀个⼦项⽬，<br>在⽣态发展（⽐如 Spark ⽤户选择和使⽤）⽅⾯存在⽐较明显的局限性。为了让 Flink Table Store 能<br>够有更⼤的发展空间和⽣态体系， Flink PMC 经过讨论决定将其捐赠 ASF 进⾏独⽴孵化。</p>
+<p>2023 年 3 ⽉ 12 ⽇，Flink Table Store 项⽬顺利通过投票，正式进⼊ Apache 软件基⾦会 (ASF) 的孵化器，改名为 Apache Paimon (incubating)。</p>
+<p>进⼊孵化器后，Paimon 得到了众多的关注，包括 阿⾥云、字节跳动、Bilibili、汽⻋之家、蚂蚁 等多家公司参与到 Apache Paimon 的贡献，也得到了⼴⼤⽤户的使⽤。</p>
+<p>Paimon 和 Flink 集成也在继续，Paimon 集成了 Flink CDC，提出了全⾃动的 数据 + Schema 的同步，整库同步，带来更⾼性能的⼊湖、更低的⼊湖成本、更⽅便的⼊湖体验。</p>
+<h3 id="1-架构"><a href="#1-架构" class="headerlink" title="1 架构"></a>1 架构</h3><p><img src="/img/paimon/paimon-1.png" srcset="/img/loading.gif" lazyload></p>
+<p>如上架构所示：</p>
+<p><strong>读&#x2F;写</strong>： Paimon 支持多种读&#x2F;写数据和执行 OLAP 查询的方式。</p>
+<ul>
+<li>对于读取，它支持消费数据 <ul>
+<li>从历史快照（批处理模式），</li>
+<li>从最新的偏移量（在流模式下），或</li>
+<li>以混合方式读取增量快照。</li>
+</ul>
+</li>
+<li>对于写入，它支持来自数据库变更日志（CDC）的流式同步或来自离线数据的批量插入&#x2F;覆盖。</li>
+</ul>
+<p><strong>生态系统</strong>：除了Apache Flink之外，Paimon还支持Apache Hive、Apache Spark、Trino等其他计算引擎的读取。</p>
+<p><strong>内部</strong>：在底层，Paimon 将列式文件存储在文件系统&#x2F;对象存储上，并使用 LSM 树结构来支持大量数据更新和高性能查询。</p>
+<h3 id="2-统一存储"><a href="#2-统一存储" class="headerlink" title="2 统一存储"></a>2 统一存储</h3><p>对于 Apache Flink 这样的流引擎，通常有三种类型的连接器：</p>
+<ul>
+<li>消息队列，例如 Apache Kafka，在该管道的源阶段和中间阶段都使用它，以保证延迟保持在秒级。</li>
+<li>OLAP系统，例如ClickHouse，它以流方式接收处理后的数据并服务于用户的即席查询。</li>
+<li>批量存储，例如Apache Hive，它支持传统批处理的各种操作，包括INSERT OVERWRITE.</li>
+</ul>
+<p>Paimon 提供表抽象。它的使用方式与传统数据库没有什么区别：</p>
+<ul>
+<li>在batch执行模式下，它就像一个Hive表，支持Batch SQL的各种操作。查询它以查看最新的快照。</li>
+<li>在streaming执行模式下，它的作用就像一个消息队列。查询它的行为就像从历史数据永不过期的消息队列中查询流更改日志。</li>
+</ul>
+<h3 id="3-Streaming-Lakehouse-架构："><a href="#3-Streaming-Lakehouse-架构：" class="headerlink" title="3 Streaming Lakehouse 架构："></a>3 Streaming Lakehouse 架构：</h3><p>1、数据全链路实时流动，同时沉淀所有数据，提供 AD-HOC 查询；</p>
+<p>2、通⽤的离线数据实时化，流批融合的⼀套数仓。</p>
+<p><img src="/img/paimon/paimon-3.png" srcset="/img/loading.gif" lazyload></p>
 
                 
               </div>
@@ -305,7 +346,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/JAVA-%E5%9F%BA%E7%A1%80/" class="category-chain-item">JAVA 基础</a>
+  <a href="/categories/Apache-Paimon/" class="category-chain-item">Apache Paimon</a>
   
   
 
@@ -320,7 +361,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/JAVA-%E5%9F%BA%E7%A1%80/" class="print-no-link">#JAVA 基础</a>
+        <a href="/tags/Apache-Paimon/" class="print-no-link">#Apache Paimon</a>
       
     </div>
   
@@ -332,8 +373,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发</div>
-      <div>http://example.com/2023/10/07/java/JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发/</div>
+      <div>Apache Paimon -- 介绍</div>
+      <div>http://example.com/2023/10/17/paimon/Apache Paimon -- 介绍/</div>
     </div>
     <div class="license-meta">
       
@@ -345,7 +386,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年10月7日</div>
+          <div>2023年10月17日</div>
         </div>
       
       
@@ -377,9 +418,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/10/09/bigDataComponents/hbase/Hbase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Hbase -- 数据模型">
+                      <a href="/2023/10/17/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E5%B8%83%E5%B1%80/" title="Apache Paimon -- 文件布局">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Hbase -- 数据模型</span>
+                        <span class="hidden-mobile">Apache Paimon -- 文件布局</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -387,8 +428,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E5%AE%9E%E6%97%B6%E6%8C%87%E6%A0%87%E7%9A%84%E8%B4%A8%E9%87%8F/" title="Flink 基础学习 -- 如何保障实时指标的质量">
-                        <span class="hidden-mobile">Flink 基础学习 -- 如何保障实时指标的质量</span>
+                      <a href="/2023/10/09/bigDataComponents/hbase/Hbase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Hbase -- 数据模型">
+                        <span class="hidden-mobile">Hbase -- 数据模型</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
