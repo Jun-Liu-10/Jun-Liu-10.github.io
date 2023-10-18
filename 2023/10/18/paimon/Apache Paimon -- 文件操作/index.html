@@ -1,0 +1,773 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/web.jpeg">
+  <link rel="icon" href="/img/web.jpeg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="Liu Jun">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="创建 Catalog在 Flink lib 中放⼊ paimon-flink 依赖包，执⾏ .&#x2F;sql-client.sh 启动 Flink SQL Client，然后执⾏下⾯的命令去创建 Paimon catlog： 123456CREATE CATALOG paimon WITH (    &amp;#x27;type&amp;#x27; &#x3D; &amp;#x27;paimon&amp;#x27;,    &amp;#x27">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache Paimon -- 文件操作">
+<meta property="og:url" content="http://example.com/2023/10/18/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/index.html">
+<meta property="og:site_name" content="ACMAN">
+<meta property="og:description" content="创建 Catalog在 Flink lib 中放⼊ paimon-flink 依赖包，执⾏ .&#x2F;sql-client.sh 启动 Flink SQL Client，然后执⾏下⾯的命令去创建 Paimon catlog： 123456CREATE CATALOG paimon WITH (    &amp;#x27;type&amp;#x27; &#x3D; &amp;#x27;paimon&amp;#x27;,    &amp;#x27">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-3.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-4.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-5.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-6.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-7.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-8.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-9.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-10.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-11.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-12.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-13.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-14.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-15.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-16.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-17.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-18.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-19.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-20.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-21.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-22.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-23.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-24.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-25.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-26.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-27.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-28.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-29.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-30.png">
+<meta property="og:image" content="http://example.com/img/paimon/job/paimon-job-31.png">
+<meta property="article:published_time" content="2023-10-18T07:14:12.000Z">
+<meta property="article:modified_time" content="2023-10-18T02:52:09.641Z">
+<meta property="article:author" content="Liu Jun">
+<meta property="article:tag" content="Apache Paimon">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/paimon/job/paimon-job-3.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>Apache Paimon -- 文件操作 - ACMAN</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.5-a","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Jun Liu の Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('https://fluid.s3.bitiful.net/bg/vdysjx.png?w=1920&fmt=webp') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Apache Paimon -- 文件操作"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2023-10-18 15:14" pubdate>
+          2023年10月18日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          59 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Apache Paimon -- 文件操作</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="创建-Catalog"><a href="#创建-Catalog" class="headerlink" title="创建 Catalog"></a>创建 Catalog</h2><p>在 Flink lib 中放⼊ <a target="_blank" rel="noopener" href="https://repository.apache.org/snapshots/org/apache/paimon/paimon-flink-1.16/0.6-SNAPSHOT/">paimon-flink 依赖包</a>，执⾏ .&#x2F;sql-client.sh 启动 Flink SQL Client，然后执⾏下⾯的命令去创建 Paimon catlog：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> CATALOG paimon <span class="hljs-keyword">WITH</span> (<br>    <span class="hljs-string">&#x27;type&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;paimon&#x27;</span>,<br>    <span class="hljs-string">&#x27;warehouse&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;file:///tmp/paimon&#x27;</span><br>);<br><br>USE CATALOG paimon;<br></code></pre></td></tr></table></figure>
+<p>执⾏完后会在 file:&#x2F;&#x2F;&#x2F;tmp&#x2F;paimon 路径下创建⽬录 default.db。</p>
+<h2 id="创建-Table"><a href="#创建-Table" class="headerlink" title="创建 Table"></a>创建 Table</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> T<br>(<br>    id <span class="hljs-type">BIGINT</span>,<br>    a  <span class="hljs-type">INT</span>,<br>    b  STRING,<br>    dt STRING COMMENT <span class="hljs-string">&#x27;timestamp string in format yyyyMMdd&#x27;</span>,<br>    <span class="hljs-keyword">PRIMARY</span> KEY (id, dt) <span class="hljs-keyword">NOT</span> ENFORCED<br>) PARTITIONED <span class="hljs-keyword">BY</span> (dt);<br></code></pre></td></tr></table></figure>
+<p>执⾏后，Paimon 表 T 会在 &#x2F;tmp&#x2F;paimon&#x2F;default.db&#x2F;T ⽬录下⽣成⽬录，它的 schema 会存放在⽬录 &#x2F;tmp&#x2F;paimon&#x2F;default.db&#x2F;T&#x2F;schema&#x2F;schema-0 下。</p>
+<h2 id="写入数据到-Table"><a href="#写入数据到-Table" class="headerlink" title="写入数据到 Table"></a>写入数据到 Table</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> T <span class="hljs-keyword">VALUES</span> (<span class="hljs-number">1</span>, <span class="hljs-number">10001</span>, <span class="hljs-string">&#x27;varchar00001&#x27;</span>, <span class="hljs-string">&#x27;20230501&#x27;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>⽤户可以通过执⾏查询 <code>SELECT * FROM T;</code> 来验证这些记录的可⻅性，该查询将返回⼀⾏结果。</p>
+<p>提交过程会创建⼀个位于路径 &#x2F;tmp&#x2F;paimon&#x2F;default.db&#x2F;T&#x2F;snapshot&#x2F;snapshot-1 的快照。snapshot-1 的⽂件布局如下所述：</p>
+<p>⼀旦任务运⾏完成变成 finished 时，提交成功后数据就写⼊到 Paimon 表中。⽤户可以通过执⾏查询 SELECT * FROM T 来验证数据的可⻅性，该查询将返回⼀⾏结果。</p>
+<p>另外可以发现⽬录的结构发⽣如下变化，新增 <code>dt=20230501</code> 、 <code>manifest</code> 和 <code>snapshot</code> 三个⽬录。三个的⽬录结构如下：<br><img src="/img/paimon/job/paimon-job-3.png" srcset="/img/loading.gif" lazyload></p>
+<p>查询⽬录下的数据如下所示：<br><img src="/img/paimon/job/paimon-job-4.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/paimon/job/paimon-job-5.png" srcset="/img/loading.gif" lazyload></p>
+<p>这是因为提交过程中会创建⼀个位于 &#x2F;tmp&#x2F;paimon&#x2F;default.db&#x2F;T&#x2F;snapshot&#x2F;snapshot-1 的快照。 snapshot-1 的⽂件布局如下所述：<br><img src="/img/paimon/job/paimon-job-6.png" srcset="/img/loading.gif" lazyload></p>
+<p>snapshot-1 的内容包含了这个 snapshot 的元数据，⽐如 manifest list 和 schema id：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;version&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;id&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;schemaId&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;baseManifestList&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;manifest-list-9c408d6b-21cf-445d-9be8-e3f3b04f1bc4-0&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;deltaManifestList&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;manifest-list-9c408d6b-21cf-445d-9be8-e3f3b04f1bc4-1&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;changelogManifestList&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;commitUser&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;76198586-8c3f-4b4e-ae8a-9ffc5c871965&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;commitIdentifier&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">9223372036854775807</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;commitKind&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;APPEND&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;timeMillis&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">1697509431254</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;logOffsets&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;totalRecordCount&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;deltaRecordCount&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;changelogRecordCount&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;watermark&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">-9223372036854775808</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>需要提醒的是，manifest list 包含了 snapshot 的所有更改，baseManifestList 是应⽤在 deltaManifestList 中的更改所基于的基本⽂件。第⼀次提交将导致⽣成 1 个清单⽂件，并创建了 2 个清单列表（⽂件名可能与你的实验中的不同）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs text">-rw-r--r--   3 flink supergroup       1714 2023-10-17 10:23 /paimon/default.db/T/manifest/manifest-00ab8926-acc2-4e31-b6b1-776e00976dc1-0<br>-rw-r--r--   3 flink supergroup        676 2023-10-17 10:23 /paimon/default.db/T/manifest/manifest-list-9c408d6b-21cf-445d-9be8-e3f3b04f1bc4-0<br>-rw-r--r--   3 flink supergroup        794 2023-10-17 10:23 /paimon/default.db/T/manifest/manifest-list-9c408d6b-21cf-445d-9be8-e3f3b04f1bc4-1<br></code></pre></td></tr></table></figure>
+<p><img src="/img/paimon/job/paimon-job-7.png" srcset="/img/loading.gif" lazyload></p>
+<p><code>manifest-00ab8926-acc2-4e31-b6b1-776e00976dc1-0</code>：如前⾯⽂件布局图中的 manifest-1-0 ，存储了关于 snapshot 中数据⽂件信息的 manifest。<br><img src="/img/paimon/job/paimon-job-8.png" srcset="/img/loading.gif" lazyload></p>
+<p><code>manifest-list-9c408d6b-21cf-445d-9be8-e3f3b04f1bc4-0</code>：是基础的 baseManifestList，如前⾯⽂件布局图中的 manifest-list-1-base ，实际上是空的。<br><img src="/img/paimon/job/paimon-job-9.png" srcset="/img/loading.gif" lazyload></p>
+<p><code>manifest-list-9c408d6b-21cf-445d-9be8-e3f3b04f1bc4-1</code>：是deltaManifestList，如前⾯⽂件布局图中的 manifest-list-1-delta ，其中包含⼀系列对数据⽂件执⾏操作的清单条⽬， ⽽在这种情况下，清单条⽬为 manifest-1-0。</p>
+<p>在不同分区中插⼊⼀批记录，在 Flink SQL 中执⾏以下语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> T <span class="hljs-keyword">VALUES</span><br>(<span class="hljs-number">2</span>, <span class="hljs-number">10002</span>, <span class="hljs-string">&#x27;varchar00002&#x27;</span>, <span class="hljs-string">&#x27;20230502&#x27;</span>),<br>(<span class="hljs-number">3</span>, <span class="hljs-number">10003</span>, <span class="hljs-string">&#x27;varchar00003&#x27;</span>, <span class="hljs-string">&#x27;20230503&#x27;</span>),<br>(<span class="hljs-number">4</span>, <span class="hljs-number">10004</span>, <span class="hljs-string">&#x27;varchar00004&#x27;</span>, <span class="hljs-string">&#x27;20230504&#x27;</span>),<br>(<span class="hljs-number">5</span>, <span class="hljs-number">10005</span>, <span class="hljs-string">&#x27;varchar00005&#x27;</span>, <span class="hljs-string">&#x27;20230505&#x27;</span>),<br>(<span class="hljs-number">6</span>, <span class="hljs-number">10006</span>, <span class="hljs-string">&#x27;varchar00006&#x27;</span>, <span class="hljs-string">&#x27;20230506&#x27;</span>),<br>(<span class="hljs-number">7</span>, <span class="hljs-number">10007</span>, <span class="hljs-string">&#x27;varchar00007&#x27;</span>, <span class="hljs-string">&#x27;20230507&#x27;</span>),<br>(<span class="hljs-number">8</span>, <span class="hljs-number">10008</span>, <span class="hljs-string">&#x27;varchar00008&#x27;</span>, <span class="hljs-string">&#x27;20230508&#x27;</span>),<br>(<span class="hljs-number">9</span>, <span class="hljs-number">10009</span>, <span class="hljs-string">&#x27;varchar00009&#x27;</span>, <span class="hljs-string">&#x27;20230509&#x27;</span>),<br>(<span class="hljs-number">10</span>, <span class="hljs-number">10010</span>, <span class="hljs-string">&#x27;varchar00010&#x27;</span>, <span class="hljs-string">&#x27;20230510&#x27;</span>);<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/paimon/job/paimon-job-10.png" srcset="/img/loading.gif" lazyload></p>
+<p>等任务执⾏完成并提交快照后，执⾏ SELECT * FROM T 将返回 10 ⾏数据。<br><img src="/img/paimon/job/paimon-job-11.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/paimon/job/paimon-job-12.png" srcset="/img/loading.gif" lazyload></p>
+<p>创建了⼀个新的快照，即 snapshot-2 ，并给出了以下物理⽂件布局：<br><img src="/img/paimon/job/paimon-job-13.png" srcset="/img/loading.gif" lazyload></p>
+<p>新的快照⽂件布局图如下：<br><img src="/img/paimon/job/paimon-job-14.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h3><p>不同的 flink 版本操作方式不一致：<a target="_blank" rel="noopener" href="https://paimon.apache.org/docs/master/how-to/writing-tables/#deleting-from-table">Deleting from table</a></p>
+<p>这里采用 flink 1.17，接下来删除满⾜条件 dt&gt;&#x3D;20230503 的数据。在 Flink SQL Client 中，执⾏以下语句：</p>
+<p>需要设置 <code>SET execution.runtime-mode = &#39;batch&#39;</code> 再执行：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">FROM</span> T <span class="hljs-keyword">WHERE</span> dt <span class="hljs-operator">&gt;=</span> <span class="hljs-string">&#x27;20230503&#x27;</span>;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/img/paimon/job/paimon-job-15.png" srcset="/img/loading.gif" lazyload></p>
+<p>第三次提交完成，并⽣成了快照 snapshot-3 。现在，表下的⽬录，会发现没有分区被删除。相反，为分区 20230503 到 20230510 创建了⼀个新的数据⽂件：</p>
+<p><img src="/img/paimon/job/paimon-job-16.png" srcset="/img/loading.gif" lazyload></p>
+<p>这是有道理的，因为我们在第⼆次提交中插⼊了⼀条数据（为 +I[10, 10010, ‘varchar00010’, ‘20230510’] ），然后在第三次提交中删除了数据。现在再执⾏⼀下 SELECT * FROM T 只能查询到两条数据。</p>
+<p><img src="/img/paimon/job/paimon-job-17.png" srcset="/img/loading.gif" lazyload></p>
+<p>snapshot-3 后新的⽂件布局如下图：</p>
+<p><img src="/img/paimon/job/paimon-job-18.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/paimon/job/paimon-job-19.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/paimon/job/paimon-job-20.png" srcset="/img/loading.gif" lazyload></p>
+<p>请注意， manifest-3-0 包含了 8 个 ADD 操作类型的清单条⽬，对应着 8 个新写⼊的数据⽂件。</p>
+<p><img src="/img/paimon/job/paimon-job-21.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Compact-Table"><a href="#Compact-Table" class="headerlink" title="Compact Table"></a>Compact Table</h2><p>你可能已经注意到的，随着连续 snapshot 的增加，⼩⽂件的数量会增加，这可能会导致读取性能下降。因此，需要进⾏全量压缩以减少⼩⽂件的数量。</p>
+<p>通过 flink run 运⾏⼀个专⽤的<a target="_blank" rel="noopener" href="https://repository.apache.org/snapshots/org/apache/paimon/paimon-flink-action/0.6-SNAPSHOT/">合并⼩⽂件任务</a>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs shell">&lt;FLINK_HOME&gt;/bin/flink run \<br> -D execution.runtime-mode=batch \<br> ./paimon-flink-action-0.6-SNAPSHOT.jar \<br> compact \<br> --warehouse &lt;warehouse-path&gt; \<br> --database &lt;database-name&gt; \<br> --table &lt;table-name&gt; \<br> [--partition &lt;partition-name&gt;] \<br> [--catalog-conf &lt;paimon-catalog-conf&gt; [--catalog-conf &lt;paimon-catalogconf&gt; ...]] \<br> [--table-conf &lt;paimon-table-dynamic-conf&gt; [--table-conf &lt;paimon-tabledynamic-conf&gt;] ...]<br></code></pre></td></tr></table></figure>
+
+<p>例如（提前下载好压缩任务 jar 在 Flink 客户端下）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs shell">./flink run \<br> -D execution.runtime-mode=batch \<br> /Users/liujun/flink/flink-1.17.1/lib/paimon-flink-action-0.5.0-incubating.jar \<br> compact \<br> --path file:///tmp/paimon/default.db/T<br></code></pre></td></tr></table></figure>
+<p><img src="/img/paimon/job/paimon-job-22.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/paimon/job/paimon-job-23.png" srcset="/img/loading.gif" lazyload></p>
+<p>压缩任务结束后，再来看下 snapshot-4 ⽂件结构：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;version&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">3</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;id&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">4</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;schemaId&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;baseManifestList&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;manifest-list-4b0018e9-435c-4bfb-b379-6b918aa75c48-0&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;deltaManifestList&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;manifest-list-4b0018e9-435c-4bfb-b379-6b918aa75c48-1&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;changelogManifestList&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;commitUser&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;722fd008-f240-4225-ae2b-12b1a1c5f546&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;commitIdentifier&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">9223372036854775807</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;commitKind&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;COMPACT&quot;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;timeMillis&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">1697591820188</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;logOffsets&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span> <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;totalRecordCount&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">38</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;deltaRecordCount&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">20</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;changelogRecordCount&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">0</span><span class="hljs-punctuation">,</span><br>  <span class="hljs-attr">&quot;watermark&quot;</span> <span class="hljs-punctuation">:</span> <span class="hljs-number">-9223372036854775808</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+<p><img src="/img/paimon/job/paimon-job-24.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/img/paimon/job/paimon-job-25.png" srcset="/img/loading.gif" lazyload></p>
+<p>manifest-4-0 包含 20 个清单条⽬（18 个 DELETE 操作和 2 个 ADD 操作）:</p>
+<ul>
+<li>对于分区 20230503 到 20230510，有两个删除操作，对应两个数据⽂件</li>
+<li>对于分区 20230501 到 20230502，有⼀个删除操作和⼀个添加操作，对应同⼀个数据⽂件。</li>
+</ul>
+<h2 id="Alter-Table"><a href="#Alter-Table" class="headerlink" title="Alter Table"></a>Alter Table</h2><p>执⾏以下语句来配置全量压缩：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> T <span class="hljs-keyword">SET</span> (<span class="hljs-string">&#x27;full-compaction.delta-commits&#x27;</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;1&#x27;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>这将为 Paimon 表创建⼀个新的 schema，即 schema-1，但在下⼀次提交之前，不会有任何 snapshot 使⽤此模式。</p>
+<p><img src="/img/paimon/job/paimon-job-26.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="过期-snapshot"><a href="#过期-snapshot" class="headerlink" title="过期 snapshot"></a>过期 snapshot</h2><p>请注意，标记为删除的数据⽂件直到 snapshot 过期且没有任何消费者依赖于该 snapshot 时才会真正被删除。参考 <a target="_blank" rel="noopener" href="https://paimon.apache.org/docs/master/maintenance/manage-snapshots/#expiring-snapshots">Manage Snapshots</a> 可以查阅更多信息。</p>
+<p>在 snapshot 过期过程中，⾸先确定 snapshot 的范围，然后标记这些 snapshot 内的数据⽂件以进⾏删除。只有当存在引⽤特定数据⽂件的 DELETE 类型的清单条⽬时，才会标记该数据⽂件进⾏删除。这种标记确保⽂件不会被后续的 snapshot 使⽤，并且可以安全地删除。</p>
+<p>假设上图中的所有 4 个 snapshot 即将过期。过期过程如下:</p>
+<p>1、⾸先删除所有标记为删除的数据⽂件，并记录任何更改的 bucket。</p>
+<p>2、然后删除所有的 changelog ⽂件和关联的 manifests。</p>
+<p>3、最后，删除快照本身并写⼊最早的提示⽂件。</p>
+<p>如果删除过程后留下的空⽬录，也将被删除。</p>
+<p>假设创建了另⼀个快照 snapshot-5，并触发了快照过期。将删除 snapshot-1 到 snapshot-4。为简单起⻅，我们只关注以前快照的⽂件，快照过期后的最终布局如下：</p>
+<p><img src="/img/paimon/job/paimon-job-27.png" srcset="/img/loading.gif" lazyload></p>
+<p>因此，分区 20230503 到 20230510 的数据被物理删除了。</p>
+<h2 id="Flink-流式写⼊"><a href="#Flink-流式写⼊" class="headerlink" title="Flink 流式写⼊"></a>Flink 流式写⼊</h2><p>我们通过利⽤ CDC 数据的示例来测试 Flink 流式写⼊，将介绍将变更数据捕获并写⼊ Paimon 的过程， 以及异步压缩、快照提交和过期的机制背后的原理。</p>
+<p>帮我们更详细地了解 CDC 数据摄取的⼯作流程以及每个参与组件所扮演的独特⻆⾊。<br><img src="/img/paimon/job/paimon-job-28.png" srcset="/img/loading.gif" lazyload></p>
+<p>1、MySQL CDC Source 统⼀读取快照数据和增量数据，其中 SnapshotReader 读取快照数据，⽽ BinlogReader 读取增量数据。</p>
+<p>2、Paimon Sink 将数据按 Bucket 级别写⼊ Paimon 表中。其中的 CompactManager 将异步触发压缩操作。</p>
+<p>3、Committer Operator 是⼀个单例，负责提交和过期快照。</p>
+<p>接下来，我们将逐步介绍端到端的数据流程：<br><img src="/img/paimon/job/paimon-job-29.png" srcset="/img/loading.gif" lazyload></p>
+<p>MySQL CDC Source ⾸先读取快照数据和增量数据，然后对它们进⾏规范化处理，并将其发送到下游。<br><img src="/img/paimon/job/paimon-job-30.png" srcset="/img/loading.gif" lazyload></p>
+<p>Paimon Sink ⾸先将新记录缓存在基于堆的 LSM 树中，并在内存缓冲区满时将其 flush 到磁盘上。 请注意，每个写⼊的数据⽂件都是⼀个 sorted run。在这个阶段，还没有创建 manifest ⽂件和 snapshot。</p>
+<p>在 Flink 执⾏ Checkpoint 之前，Paimon Sink 将 flush 所有缓冲的记录并发送可提交的消息到下游，下游会在 Checkpoint 期间由 Committer Operator 读取并提交。<br><img src="/img/paimon/job/paimon-job-31.png" srcset="/img/loading.gif" lazyload></p>
+<p>在 Checkpoint 期间，Committer Operator 将创建⼀个新的 snapshot，并将其与 manifest lists 关联，以便snapshot 包含表中所有数据⽂件的信息。</p>
+<p>稍等⼀会后，可能会进⾏异步压缩，CompactManager ⽣成的可提交消息包含有关先前⽂件和合并⽂件的信息，以便 Committer Operator 可以构建相应的 manifest entries。</p>
+<p>在这种情况下，Committer Operator 在Flink Checkpoint 期间可能会⽣成两个 snapshot，⼀个⽤于写⼊的数据（类型为 Append 的快照），另⼀个⽤于压缩（类型为 Compact 的快照）。</p>
+<p>如果在 Checkpoint 间隔期间没有写⼊数据⽂件，则只会创建类型为Compact 的快照。 Committer Operator 将检查 snapshot 的过期情况，并对标记为删除的数据⽂件执⾏物理删除操作。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Apache-Paimon/" class="category-chain-item">Apache Paimon</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Apache-Paimon/" class="print-no-link">#Apache Paimon</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Apache Paimon -- 文件操作</div>
+      <div>http://example.com/2023/10/18/paimon/Apache Paimon -- 文件操作/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>Liu Jun</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2023年10月18日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2023/10/16/paimon/Apache%20Paimon%20--%20%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" title="Apache Paimon -- 基本概念">
+                        <span class="hidden-mobile">Apache Paimon -- 基本概念</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

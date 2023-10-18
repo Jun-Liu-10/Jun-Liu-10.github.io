@@ -228,6 +228,384 @@
         
           <i class="index-pin iconfont icon-top" title="Pin on top"></i>
         
+        <a href="/2023/10/18/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/" target="_self">
+          Apache Paimon -- 文件操作
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/18/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/" target="_self">
+        <div>
+          创建 Catalog在 Flink lib 中放⼊ paimon-flink 依赖包，执⾏ .&#x2F;sql-client.sh 启动 Flink SQL Client，然后执⾏下⾯的命令去创建 Paimon catlog： 123456CREATE CATALOG paimon WITH (    &#x27;type&#x27; = &#x27;paimon&#x27;,    &#x27
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-10-18 15:14" pubdate>
+              2023-10-18
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Apache-Paimon/" class="category-chain-item">Apache Paimon</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Apache-Paimon/">#Apache Paimon</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
+        <a href="/2023/10/16/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E5%B8%83%E5%B1%80/" target="_self">
+          Apache Paimon -- 文件布局
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/16/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E5%B8%83%E5%B1%80/" target="_self">
+        <div>
+          一张表的所有文件都存储在一个基本目录下。Paimon 文件以分层方式组织。下图说明了文件布局。从快照文件开始，Paimon读者可以递归地访问表中的所有记录。 1 Snapshot Files所有的 snapshot ⽂件都存储在 snapshot ⽬录下，snapshot file 是⼀个包含了 snapshot 信息的 JSON ⽂件：  使⽤的 Schema ⽂件； manifest 列表包含
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-10-16 15:14" pubdate>
+              2023-10-16
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Apache-Paimon/" class="category-chain-item">Apache Paimon</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Apache-Paimon/">#Apache Paimon</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
+        <a href="/2023/10/16/paimon/Apache%20Paimon%20--%20%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" target="_self">
+          Apache Paimon -- 基本概念
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/16/paimon/Apache%20Paimon%20--%20%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" target="_self">
+        <div>
+          基本概念1 Snapshot快照（Snapshot）是在某个时间点上捕捉表状态的⽅式。⽤户可以通过最新的快照访问表的最新数据。 通过时间回溯，⽤户还可以通过较早的快照访问表的先前状态。 1234567891011121314151617181920212223public class Snapshot &#123;    // ... ...    private static final Str
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-10-16 15:14" pubdate>
+              2023-10-16
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Apache-Paimon/" class="category-chain-item">Apache Paimon</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Apache-Paimon/">#Apache Paimon</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
+        <a href="/2023/10/16/paimon/Apache%20Paimon%20--%20%E4%BB%8B%E7%BB%8D/" target="_self">
+          Apache Paimon -- 介绍
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/16/paimon/Apache%20Paimon%20--%20%E4%BB%8B%E7%BB%8D/" target="_self">
+        <div>
+          1 Flink Table Store 介绍从 Flink Table Store 演进⽽来，架构图如下：  （和今天 Paimon 的架构相⽐，Log System 不再被推荐使⽤，Lake Store 的能⼒⼤幅强于 Log System，除了延时） 2021 年 9 ⽉，发布了 0.2 版本，陆续有在⽣产使⽤。 Flink Table Store 是⼀个数据湖存储，⽤于实时流式 Change
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-10-16 13:14" pubdate>
+              2023-10-16
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Apache-Paimon/" class="category-chain-item">Apache Paimon</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Apache-Paimon/">#Apache Paimon</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
+        <a href="/2023/10/09/bigDataComponents/hbase/demo/" target="_self">
+          Hbase -- 数据模型
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/09/bigDataComponents/hbase/demo/" target="_self">
+        <div>
+          Hbase 是一个面向列式存储的分布式数据库，其设计思想来源于 Google 的 BigTable 论文。Hbase 底层存储基于 HDFS 实现，集群的管理基于 ZooKeeper 实现。Hbase 良好的分布式架构设计为海量数据的快速存储、随机访问提供了可能，基于数据副本机制和分区机制可以轻松实现在线扩容、缩容和数据容灾，是大数据领域中 Key - Value 数据结构存储最常用的数据库方案。
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-10-09 13:14" pubdate>
+              2023-10-09
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E7%BB%84%E4%BB%B6/" class="category-chain-item">大数据组件</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Flink/">#Flink</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
+        <a href="/2023/08/22/project/Flink%20+%20StarRocks%20--%20%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA%E6%8C%96%E6%8E%98%E4%B8%8E%E7%BA%BF%E7%B4%A2%E6%8E%A8%E8%8D%90/" target="_self">
+          Flink + StarRocks -- 用户行为挖掘与线索推荐
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/08/22/project/Flink%20+%20StarRocks%20--%20%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA%E6%8C%96%E6%8E%98%E4%B8%8E%E7%BA%BF%E7%B4%A2%E6%8E%A8%E8%8D%90/" target="_self">
+        <div>
+          1 背景用户在我们官网上或者是APP上会各种各样的操作行为，其中有几种典型的行为是值得做商机挖掘的，比如搜索并点击、浏览、加入购物车等等，希望大数据可以抓取过来，记载到这个客户名下，作为与客户沟通的信息谈资，同时做数据挖掘，自动推送线索到线上、线下团队，提高商机转化率。 2 需求根据需求我们需要筛选出过去180天满足线索规则的用户，比如：过去180天内浏览该商品超过10次，则符合要求；规则是按照公
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-08-22 14:14" pubdate>
+              2023-08-22
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Flink-%E5%AE%9E%E6%97%B6%E9%A1%B9%E7%9B%AE/" class="category-chain-item">Flink 实时项目</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Flink-StarRocks/">#Flink + StarRocks</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
         <a href="/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/" target="_self">
           JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发
         </a>
@@ -472,259 +850,13 @@
     </article>
   </div>
 
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
-        
-        <a href="/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E8%87%AA%E5%AE%9A%E4%B9%89%20Connector/" target="_self">
-          Flink 基础学习 -- 自定义 Connector
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E8%87%AA%E5%AE%9A%E4%B9%89%20Connector/" target="_self">
-        <div>
-          1 概述在许多情况下，开发者不需要从头开始创建新的连接器，而是希望稍微修改现有的连接器或挂钩到现有的堆栈。在其他情况下，实施者希望创建专门的连接器。 本节对这两种用例都有帮助。它解释了表连接器的一般架构，从 API 中的纯声明到将在集群上执行的运行时代码。 实心箭头显示在转换过程中对象如何从一个阶段转换为其他对象。 2 MataDataTable API 和 SQL 都是声明式 API。这包括表的
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2023-09-27 13:14" pubdate>
-              2023-09-27
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Flink-%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" class="category-chain-item">Flink 基础学习</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Flink/">#Flink</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
-        
-        <a href="/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E5%AE%9E%E6%97%B6%E6%8C%87%E6%A0%87%E7%9A%84%E8%B4%A8%E9%87%8F/" target="_self">
-          Flink 基础学习 -- 如何保障实时指标的质量
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E5%AE%9E%E6%97%B6%E6%8C%87%E6%A0%87%E7%9A%84%E8%B4%A8%E9%87%8F/" target="_self">
-        <div>
-          可以从事前、事中、事后三个时间的任务层面、指标层面去看： 1 事前 任务层面：根据峰值流量进行压力测试，并且保留一定buffer，保障任务在资源层面没有瓶颈； 指标层面：根据业务需求，上线实时任务前，在相同的口径下对实时指标和离线指标进行对比，在实时指标的误差不超过业务阈值时，才能上线。  2 事中 任务层面：贴源层监控 Kafka 堆积延迟等报警检测手段，用于事中及时发现问题。比如：用 Prom
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2023-09-27 13:14" pubdate>
-              2023-09-27
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Flink-%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" class="category-chain-item">Flink 基础学习</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Flink/">#Flink</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
-        
-        <a href="/2023/08/22/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E5%90%91%20UDF%20%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0/" target="_self">
-          Flink 基础学习 -- 如何向 UDF 传递参数
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2023/08/22/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E5%90%91%20UDF%20%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0/" target="_self">
-        <div>
-          SQL API 中加上： 1SET &#x27;pipeline.global-job-parameters&#x27;=&#x27;env:prod&#x27;;  然后在 UserDefinedFunction 的 open 方法中获取： 123456@Overridepublic void open(FunctionContext context) throws Exception &#12
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2023-08-22 14:14" pubdate>
-              2023-08-22
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Flink-%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0/" class="category-chain-item">Flink 基础学习</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Flink/">#Flink</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
-        
-        <a href="/2023/08/22/project/Flink%20+%20StarRocks%20--%20%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA%E6%8C%96%E6%8E%98%E4%B8%8E%E7%BA%BF%E7%B4%A2%E6%8E%A8%E8%8D%90/" target="_self">
-          Flink + StarRocks -- 用户行为挖掘与线索推荐
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2023/08/22/project/Flink%20+%20StarRocks%20--%20%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA%E6%8C%96%E6%8E%98%E4%B8%8E%E7%BA%BF%E7%B4%A2%E6%8E%A8%E8%8D%90/" target="_self">
-        <div>
-          1 背景用户在我们官网上或者是APP上会各种各样的操作行为，其中有几种典型的行为是值得做商机挖掘的，比如搜索并点击、浏览、加入购物车等等，希望大数据可以抓取过来，记载到这个客户名下，作为与客户沟通的信息谈资，同时做数据挖掘，自动推送线索到线上、线下团队，提高商机转化率。 2 需求根据需求我们需要筛选出过去180天满足线索规则的用户，比如：过去180天内浏览该商品超过10次，则符合要求；规则是按照公
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2023-08-22 14:14" pubdate>
-              2023-08-22
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Flink-%E5%AE%9E%E6%97%B6%E9%A1%B9%E7%9B%AE/" class="category-chain-item">Flink 实时项目</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Flink-StarRocks/">#Flink + StarRocks</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
 
 
+  <nav aria-label="navigation">
+    <span class="pagination" id="pagination">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/#board">2</a><a class="extend next" rel="next" href="/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
+    </span>
+  </nav>
 
 
 
