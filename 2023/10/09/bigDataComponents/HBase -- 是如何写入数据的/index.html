@@ -16,24 +16,26 @@
   <meta name="author" content="Liu Jun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="1 背景 &amp; 需求最近工作中遇到了一个场景：需要将多个 zip 包中的文件解压之后上传到 hdfs，串行解压上传的速度非常慢；需要改造成并行执行。 2 实现：CompletableFuture + 自定义线程池12345678910111213141516171819202122232425262728293031@Slf4j@Componentpublic class DataCheck">
+    <meta name="description" content="Region Server 寻址 HBase Client 访问 ZooKeeper； 获取写入 Region 所在的位置，即获取 hbase:meta 表位于哪个 Region Server； 访问对应的 Region Server； 获取 hbase:meta 表，并查询出目标数据位于哪个 Region Server 中的哪个 Region 中。并将该 table 的 Region 信息以及">
 <meta property="og:type" content="article">
-<meta property="og:title" content="JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发">
-<meta property="og:url" content="http://example.com/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/index.html">
+<meta property="og:title" content="HBase -- 是如何写入数据的">
+<meta property="og:url" content="http://example.com/2023/10/09/bigDataComponents/HBase%20--%20%E6%98%AF%E5%A6%82%E4%BD%95%E5%86%99%E5%85%A5%E6%95%B0%E6%8D%AE%E7%9A%84/index.html">
 <meta property="og:site_name" content="ACMAN">
-<meta property="og:description" content="1 背景 &amp; 需求最近工作中遇到了一个场景：需要将多个 zip 包中的文件解压之后上传到 hdfs，串行解压上传的速度非常慢；需要改造成并行执行。 2 实现：CompletableFuture + 自定义线程池12345678910111213141516171819202122232425262728293031@Slf4j@Componentpublic class DataCheck">
+<meta property="og:description" content="Region Server 寻址 HBase Client 访问 ZooKeeper； 获取写入 Region 所在的位置，即获取 hbase:meta 表位于哪个 Region Server； 访问对应的 Region Server； 获取 hbase:meta 表，并查询出目标数据位于哪个 Region Server 中的哪个 Region 中。并将该 table 的 Region 信息以及">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2023-10-07T02:14:12.000Z">
-<meta property="article:modified_time" content="2023-10-07T02:36:59.815Z">
+<meta property="og:image" content="http://example.com/img/bigDataComponents/hbase/hbase-6.png">
+<meta property="article:published_time" content="2023-10-09T05:14:12.000Z">
+<meta property="article:modified_time" content="2023-10-18T07:41:55.947Z">
 <meta property="article:author" content="Liu Jun">
-<meta property="article:tag" content="JAVA 基础">
+<meta property="article:tag" content="HBase">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://example.com/img/bigDataComponents/hbase/hbase-6.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发 - ACMAN</title>
+  <title>HBase -- 是如何写入数据的 - ACMAN</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -199,7 +201,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发"></span>
+            <span id="subtitle" data-typed-text="HBase -- 是如何写入数据的"></span>
           
         </div>
 
@@ -210,8 +212,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-10-07 10:14" pubdate>
-          2023年10月7日 上午
+        <time datetime="2023-10-09 13:14" pubdate>
+          2023年10月9日 下午
         </time>
       </span>
     
@@ -222,7 +224,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1k 字
+          335 字
         
       </span>
     
@@ -233,7 +235,7 @@
         
         
         
-          9 分钟
+          3 分钟
         
       </span>
     
@@ -278,15 +280,26 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发</h1>
+            <h1 id="seo-header">HBase -- 是如何写入数据的</h1>
             
             
               <div class="markdown-body">
                 
-                <h2 id="1-背景-需求"><a href="#1-背景-需求" class="headerlink" title="1 背景 &amp; 需求"></a>1 背景 &amp; 需求</h2><p>最近工作中遇到了一个场景：需要将多个 zip 包中的文件解压之后上传到 hdfs，串行解压上传的速度非常慢；需要改造成并行执行。</p>
-<h2 id="2-实现：CompletableFuture-自定义线程池"><a href="#2-实现：CompletableFuture-自定义线程池" class="headerlink" title="2 实现：CompletableFuture + 自定义线程池"></a>2 实现：CompletableFuture + 自定义线程池</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Slf4j</span><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DataCheck</span> &#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 获取当前机器的核心数</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> <span class="hljs-variable">AVAILABLE_PROCESSORS</span> <span class="hljs-operator">=</span> Runtime.getRuntime().availableProcessors();<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ThreadPoolExecutor</span> <span class="hljs-variable">THREAD_POOL_EXECUTOR</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>(<br>            <span class="hljs-number">2</span> * AVAILABLE_PROCESSORS,<br>            <span class="hljs-number">4</span> * AVAILABLE_PROCESSORS,<br>            <span class="hljs-number">3</span>, TimeUnit.SECONDS,<br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">LinkedBlockingDeque</span>&lt;&gt;(<span class="hljs-number">1024</span>),<br>            Executors.defaultThreadFactory(),<br>            <span class="hljs-keyword">new</span> <span class="hljs-title class_">ThreadPoolExecutor</span>.AbortPolicy());<br><br>    <span class="hljs-meta">@Scheduled(cron = &quot;0 */1 * * * ?&quot;)</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">upload</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 1 获取 check_status = 1 的目录</span><br>        List&lt;FileCheckLog&gt; fileCheckLogs = xxx;<br>        List&lt;CompletableFuture&lt;Void&gt;&gt; futures = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>        <span class="hljs-keyword">for</span> (FileCheckLog fileCheckLog : fileCheckLogs) &#123;<br>            CompletableFuture&lt;Void&gt; future = CompletableFuture.runAsync(() -&gt; &#123;<br>                <span class="hljs-comment">// ... ...</span><br>            &#125;, THREAD_POOL_EXECUTOR);<br>            futures.add(future);<br>        &#125;<br>        CompletableFuture.allOf(futures.toArray(<span class="hljs-keyword">new</span> <span class="hljs-title class_">CompletableFuture</span>[<span class="hljs-number">0</span>])).join();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
-
-
+                <p><img src="/img/bigDataComponents/hbase/hbase-6.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="Region-Server-寻址"><a href="#Region-Server-寻址" class="headerlink" title="Region Server 寻址"></a>Region Server 寻址</h2><ol>
+<li>HBase Client 访问 ZooKeeper；</li>
+<li>获取写入 Region 所在的位置，即获取 hbase:meta 表位于哪个 Region Server；</li>
+<li>访问对应的 Region Server；</li>
+<li>获取 hbase:meta 表，并查询出目标数据位于哪个 Region Server 中的哪个 Region 中。并将该 table 的 Region 信息以及 meta 表的位置信息缓存在客户端的 meta cache，方便下次访问；</li>
+</ol>
+<h2 id="写-Hlog"><a href="#写-Hlog" class="headerlink" title="写 Hlog"></a>写 Hlog</h2><ol start="5">
+<li>HBase Client 向 Region Server 发送写 Hlog 请求；</li>
+<li>Region Server 会通过顺序写入磁盘的方式，将 Hlog 存储在 HDFS 上；</li>
+</ol>
+<h2 id="写-MemStore-并返回结果"><a href="#写-MemStore-并返回结果" class="headerlink" title="写 MemStore 并返回结果"></a>写 MemStore 并返回结果</h2><ol start="7">
+<li>HBase Client 向 Region Server 发送写 MemStore 请求；</li>
+<li></li>
+</ol>
 
                 
               </div>
@@ -305,7 +318,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/JAVA-%E5%9F%BA%E7%A1%80/" class="category-chain-item">JAVA 基础</a>
+  <a href="/categories/HBase/" class="category-chain-item">HBase</a>
   
   
 
@@ -320,7 +333,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/JAVA-%E5%9F%BA%E7%A1%80/" class="print-no-link">#JAVA 基础</a>
+        <a href="/tags/HBase/" class="print-no-link">#HBase</a>
       
     </div>
   
@@ -332,8 +345,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发</div>
-      <div>http://example.com/2023/10/07/java/JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发/</div>
+      <div>HBase -- 是如何写入数据的</div>
+      <div>http://example.com/2023/10/09/bigDataComponents/HBase -- 是如何写入数据的/</div>
     </div>
     <div class="license-meta">
       
@@ -345,7 +358,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年10月7日</div>
+          <div>2023年10月9日</div>
         </div>
       
       
@@ -377,9 +390,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/10/09/bigDataComponents/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/" title="HBase -- 架构组成">
+                      <a href="/2023/10/09/bigDataComponents/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Hbase -- 数据模型">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">HBase -- 架构组成</span>
+                        <span class="hidden-mobile">Hbase -- 数据模型</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -387,8 +400,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/09/27/flink/Flink%20%E5%9F%BA%E7%A1%80%E5%AD%A6%E4%B9%A0%20--%20%E5%A6%82%E4%BD%95%E4%BF%9D%E9%9A%9C%E5%AE%9E%E6%97%B6%E6%8C%87%E6%A0%87%E7%9A%84%E8%B4%A8%E9%87%8F/" title="Flink 基础学习 -- 如何保障实时指标的质量">
-                        <span class="hidden-mobile">Flink 基础学习 -- 如何保障实时指标的质量</span>
+                      <a href="/2023/10/09/bigDataComponents/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/" title="HBase -- 架构组成">
+                        <span class="hidden-mobile">HBase -- 架构组成</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
