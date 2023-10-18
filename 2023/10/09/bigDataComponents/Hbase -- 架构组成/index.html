@@ -16,29 +16,27 @@
   <meta name="author" content="Liu Jun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="1 Flink Table Store 介绍从 Flink Table Store 演进⽽来，架构图如下：  （和今天 Paimon 的架构相⽐，Log System 不再被推荐使⽤，Lake Store 的能⼒⼤幅强于 Log System，除了延时） 2021 年 9 ⽉，发布了 0.2 版本，陆续有在⽣产使⽤。 Flink Table Store 是⼀个数据湖存储，⽤于实时流式 Change">
+    <meta name="description" content="HBase 的核心架构由五部分组成，分别是 HBase Client、HMaster、Region Server、ZooKeeper 以及 HDFS。它的架构组成如下图所示。 下面我们对 HBase 架构组成的每一部分详细介绍一下。 HBase ClientHBase Client 为用户提供了访问 HBase 的接口，可以通过元数据表来定位到目标数据的 RegionServer，另外 HBase">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Apache Paimon -- 介绍">
-<meta property="og:url" content="http://example.com/2023/10/17/paimon/Apache%20Paimon%20--%20%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:title" content="Hbase -- 架构组成">
+<meta property="og:url" content="http://example.com/2023/10/09/bigDataComponents/Hbase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/index.html">
 <meta property="og:site_name" content="ACMAN">
-<meta property="og:description" content="1 Flink Table Store 介绍从 Flink Table Store 演进⽽来，架构图如下：  （和今天 Paimon 的架构相⽐，Log System 不再被推荐使⽤，Lake Store 的能⼒⼤幅强于 Log System，除了延时） 2021 年 9 ⽉，发布了 0.2 版本，陆续有在⽣产使⽤。 Flink Table Store 是⼀个数据湖存储，⽤于实时流式 Change">
+<meta property="og:description" content="HBase 的核心架构由五部分组成，分别是 HBase Client、HMaster、Region Server、ZooKeeper 以及 HDFS。它的架构组成如下图所示。 下面我们对 HBase 架构组成的每一部分详细介绍一下。 HBase ClientHBase Client 为用户提供了访问 HBase 的接口，可以通过元数据表来定位到目标数据的 RegionServer，另外 HBase">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/paimon/flink-table-store.png">
-<meta property="og:image" content="http://example.com/img/paimon/paimon-2.png">
-<meta property="og:image" content="http://example.com/img/paimon/paimon-1.png">
-<meta property="og:image" content="http://example.com/img/paimon/paimon-3.png">
-<meta property="article:published_time" content="2023-10-17T05:14:12.000Z">
-<meta property="article:modified_time" content="2023-10-18T02:53:51.353Z">
+<meta property="og:image" content="http://example.com/img/bigDataComponents/hbase/hbase-4.png">
+<meta property="og:image" content="http://example.com/img/bigDataComponents/hbase/hbase-5.png">
+<meta property="article:published_time" content="2023-10-09T05:14:12.000Z">
+<meta property="article:modified_time" content="2023-10-18T07:27:15.140Z">
 <meta property="article:author" content="Liu Jun">
-<meta property="article:tag" content="Apache Paimon">
+<meta property="article:tag" content="HBase">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/paimon/flink-table-store.png">
+<meta name="twitter:image" content="http://example.com/img/bigDataComponents/hbase/hbase-4.png">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Apache Paimon -- 介绍 - ACMAN</title>
+  <title>Hbase -- 架构组成 - ACMAN</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -204,7 +202,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Apache Paimon -- 介绍"></span>
+            <span id="subtitle" data-typed-text="Hbase -- 架构组成"></span>
           
         </div>
 
@@ -215,8 +213,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-10-17 13:14" pubdate>
-          2023年10月17日 下午
+        <time datetime="2023-10-09 13:14" pubdate>
+          2023年10月9日 下午
         </time>
       </span>
     
@@ -227,7 +225,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.5k 字
+          2.1k 字
         
       </span>
     
@@ -238,7 +236,7 @@
         
         
         
-          13 分钟
+          18 分钟
         
       </span>
     
@@ -283,51 +281,58 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">Apache Paimon -- 介绍</h1>
+            <h1 id="seo-header">Hbase -- 架构组成</h1>
             
             
               <div class="markdown-body">
                 
-                <h2 id="1-Flink-Table-Store-介绍"><a href="#1-Flink-Table-Store-介绍" class="headerlink" title="1 Flink Table Store 介绍"></a>1 Flink Table Store 介绍</h2><p>从 Flink Table Store 演进⽽来，架构图如下：</p>
-<p><img src="/img/paimon/flink-table-store.png" srcset="/img/loading.gif" lazyload></p>
-<p>（和今天 Paimon 的架构相⽐，Log System 不再被推荐使⽤，Lake Store 的能⼒⼤幅强于 Log System，除了延时）</p>
-<p>2021 年 9 ⽉，发布了 0.2 版本，陆续有在⽣产使⽤。</p>
-<p>Flink Table Store 是⼀个数据湖存储，⽤于实时流式 Changelog 写⼊ (⽐如来⾃ Flink CDC 的数据) 和<br>⾼性能查询。它创新性的结合湖存储和 LSM 结构，深度对接 Flink，提供实时更新的系统设计，⽀撑⼤<br>吞吐量的更新数据摄取，同时提供良好的查询性能。</p>
-<p>0.3 形成了⼀个 Streaming Lakehouse 的基本雏形，我们可以⽐较⾃信的说出，0.3 可以推荐⽣产可⽤了。</p>
-<p>基于 Flink Table Store 不仅可以⽀持数据实时⼊湖，⽽且⽀持 Partial Update 等功能，帮助⽤户更灵活的在延迟和成本之间做均衡。<br><img src="/img/paimon/paimon-2.png" srcset="/img/loading.gif" lazyload></p>
-<p>解决问题：<br>1、Paimon 实时 CDC ⼊湖<br>2、Paimon 实时宽表与流读</p>
-<h2 id="2-Apache-Paimon"><a href="#2-Apache-Paimon" class="headerlink" title="2 Apache Paimon"></a>2 Apache Paimon</h2><p>在发布了三个版本后，虽然 Flink Table Store 具备了⼀定的成熟度，但作为 Flink 社区的⼀个⼦项⽬，<br>在⽣态发展（⽐如 Spark ⽤户选择和使⽤）⽅⾯存在⽐较明显的局限性。为了让 Flink Table Store 能<br>够有更⼤的发展空间和⽣态体系， Flink PMC 经过讨论决定将其捐赠 ASF 进⾏独⽴孵化。</p>
-<p>2023 年 3 ⽉ 12 ⽇，Flink Table Store 项⽬顺利通过投票，正式进⼊ Apache 软件基⾦会 (ASF) 的孵化器，改名为 Apache Paimon (incubating)。</p>
-<p>进⼊孵化器后，Paimon 得到了众多的关注，包括 阿⾥云、字节跳动、Bilibili、汽⻋之家、蚂蚁 等多家公司参与到 Apache Paimon 的贡献，也得到了⼴⼤⽤户的使⽤。</p>
-<p>Paimon 和 Flink 集成也在继续，Paimon 集成了 Flink CDC，提出了全⾃动的 数据 + Schema 的同步，整库同步，带来更⾼性能的⼊湖、更低的⼊湖成本、更⽅便的⼊湖体验。</p>
-<h3 id="1-架构"><a href="#1-架构" class="headerlink" title="1 架构"></a>1 架构</h3><p><img src="/img/paimon/paimon-1.png" srcset="/img/loading.gif" lazyload></p>
-<p>如上架构所示：</p>
-<p><strong>读&#x2F;写</strong>： Paimon 支持多种读&#x2F;写数据和执行 OLAP 查询的方式。</p>
+                <p>HBase 的核心架构由五部分组成，分别是 <code>HBase Client</code>、<code>HMaster</code>、<code>Region Server</code>、<code>ZooKeeper</code> 以及 <code>HDFS</code>。它的架构组成如下图所示。<br><img src="/img/bigDataComponents/hbase/hbase-4.png" srcset="/img/loading.gif" lazyload></p>
+<p>下面我们对 HBase 架构组成的每一部分详细介绍一下。</p>
+<h2 id="HBase-Client"><a href="#HBase-Client" class="headerlink" title="HBase Client"></a>HBase Client</h2><p>HBase Client 为用户提供了访问 HBase 的接口，可以通过元数据表来定位到目标数据的 RegionServer，另外 HBase Client 还维护了对应的 cache 来加速 Hbase 的访问，比如缓存元数据的信息。</p>
+<h2 id="HMaster"><a href="#HMaster" class="headerlink" title="HMaster"></a>HMaster</h2><p>HMaster 是 HBase 集群的主节点，负责整个集群的管理工作，主要工作职责如下：</p>
 <ul>
-<li>对于读取，它支持消费数据 <ul>
-<li>从历史快照（批处理模式），</li>
-<li>从最新的偏移量（在流模式下），或</li>
-<li>以混合方式读取增量快照。</li>
+<li><p>分配Region：负责启动的时候分配Region到具体的 RegionServer；</p>
+</li>
+<li><p>负载均衡：一方面负责将用户的数据均衡地分布在各个 Region Server 上，防止Region Server数据倾斜过载。另一方面负责将用户的请求均衡地分布在各个 Region Server 上，防止Region Server 请求过热；</p>
+</li>
+<li><p>维护数据：发现失效的 Region，并将失效的 Region 分配到正常的 RegionServer 上，并且在Region Sever 失效的时候，协调对应的HLog进行任务的拆分。</p>
+</li>
+</ul>
+<h2 id="Region-Server"><a href="#Region-Server" class="headerlink" title="Region Server"></a>Region Server</h2><p>Region Server 直接对接用户的读写请求，是真正的干活的节点，主要工作职责如下。</p>
+<ul>
+<li><p>管理 HMaster 为其分配的 Region；</p>
+</li>
+<li><p>负责与底层的 HDFS 交互，存储数据到 HDFS；</p>
+</li>
+<li><p>负责 Region 变大以后的拆分以及 StoreFile 的合并工作。</p>
+</li>
+</ul>
+<p>与 HMaster 的协同：当某个 RegionServer 宕机之后，ZK 会通知 Master 进行失效备援。下线的 RegionServer 所负责的 Region 暂时停止对外提供服务，Master 会将该 RegionServer 所负责的 Region 转移到其他 RegionServer 上，并且会对所下线的 RegionServer 上存在 MemStore 中还未持久化到磁盘中的数据由 Hlog 重播进行恢复。</p>
+<p>下面给大家详细介绍下 Region Serve数据存储的基本结构，如下图所示。一个 Region Server 是包含多个 Region 的，这里仅展示一个。<br><img src="/img/bigDataComponents/hbase/hbase-5.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li><p>Region：每一个 Region 都有起始 RowKey 和结束 RowKey，代表了存储的Row的范围，保存着表中某段连续的数据。一开始每个表都只有一个 Region，随着数据量不断增加，当 Region 大小达到一个阀值时，Region 就会被 Regio Server 水平切分成两个新的 Region。当 Region 很多时，HMaster 会将 Region 保存到其他 Region Server 上。</p>
+</li>
+<li><p>Store：一个 Region 由多个 Store 组成，每个 Store 都对应一个 Column Family, Store 包含 MemStore 和 StoreFile。</p>
+<ul>
+<li>MemStore：作为HBase的内存数据存储，数据的写操作会先写到 MemStore 中，当MemStore 中的数据增长到一个阈值（默认64M）后，Region Server 会启动 flasheatch 进程将 MemStore 中的数据写入 StoreFile 持久化存储，每次写入后都形成一个单独的 StoreFile。当客户端检索数据时，先在 MemStore中查找，如果MemStore 中不存在，则会在 StoreFile 中继续查找。</li>
+<li>StoreFile：MemStore 内存中的数据写到文件后就是StoreFile，StoreFile底层是以 HFile 的格式保存。HBase以Store的大小来判断是否需要切分Region。当一个Region 中所有 StoreFile 的大小和数量都增长到超过一个阈值时，HMaster 会把当前Region分割为两个，并分配到其他 Region Server 上，实现负载均衡。</li>
 </ul>
 </li>
-<li>对于写入，它支持来自数据库变更日志（CDC）的流式同步或来自离线数据的批量插入&#x2F;覆盖。</li>
+<li><p>HFile：HFile 和 StoreFile 是同一个文件，只不过站在 HDFS 的角度称这个文件为HFile，站在HBase的角度就称这个文件为StoreFile。</p>
+</li>
+<li><p>HLog：负责记录着数据的操作日志，当HBase出现故障时可以进行日志重放、故障恢复。例如，磁盘掉电导致 MemStore中的数据没有持久化存储到 StoreFile，这时就可以通过HLog日志重放来恢复数据。</p>
+</li>
 </ul>
-<p><strong>生态系统</strong>：除了Apache Flink之外，Paimon还支持Apache Hive、Apache Spark、Trino等其他计算引擎的读取。</p>
-<p><strong>内部</strong>：在底层，Paimon 将列式文件存储在文件系统&#x2F;对象存储上，并使用 LSM 树结构来支持大量数据更新和高性能查询。</p>
-<h3 id="2-统一存储"><a href="#2-统一存储" class="headerlink" title="2 统一存储"></a>2 统一存储</h3><p>对于 Apache Flink 这样的流引擎，通常有三种类型的连接器：</p>
+<h2 id="ZooKeeper"><a href="#ZooKeeper" class="headerlink" title="ZooKeeper"></a>ZooKeeper</h2><p>HBase 通过 ZooKeeper 来完成选举 HMaster、监控 Region Server、维护元数据集群配置等工作，主要工作职责如下：</p>
 <ul>
-<li>消息队列，例如 Apache Kafka，在该管道的源阶段和中间阶段都使用它，以保证延迟保持在秒级。</li>
-<li>OLAP系统，例如ClickHouse，它以流方式接收处理后的数据并服务于用户的即席查询。</li>
-<li>批量存储，例如Apache Hive，它支持传统批处理的各种操作，包括INSERT OVERWRITE.</li>
+<li><p>选举HMaster：通ooKeeper来保证集中有1HMaster在运行，如果 HMaster 异常，则会通过选举机制产生新的 HMaster 来提供服务；</p>
+</li>
+<li><p>监控Region Server: 通过 ZooKeeper 来监控 Region Server 的状态，当Region Server 有异常的时候，通过回调的形式通知 HMaster 有关Region Server 上下线的信息；</p>
+</li>
+<li><p>维护元数据和集群配置：通过ZooKeeper储B信息并对外提供访问接口。</p>
+</li>
 </ul>
-<p>Paimon 提供表抽象。它的使用方式与传统数据库没有什么区别：</p>
-<ul>
-<li>在batch执行模式下，它就像一个Hive表，支持Batch SQL的各种操作。查询它以查看最新的快照。</li>
-<li>在streaming执行模式下，它的作用就像一个消息队列。查询它的行为就像从历史数据永不过期的消息队列中查询流更改日志。</li>
-</ul>
-<h3 id="3-Streaming-Lakehouse-架构："><a href="#3-Streaming-Lakehouse-架构：" class="headerlink" title="3 Streaming Lakehouse 架构："></a>3 Streaming Lakehouse 架构：</h3><p>1、数据全链路实时流动，同时沉淀所有数据，提供 AD-HOC 查询；</p>
-<p>2、通⽤的离线数据实时化，流批融合的⼀套数仓。</p>
-<p><img src="/img/paimon/paimon-3.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="HDFS"><a href="#HDFS" class="headerlink" title="HDFS"></a>HDFS</h2><p>HDFS 为 HBase 提供底层数据存储服务，同时为 HBase提供高可用的支持， HBase 将 HLog 存储在 HDFS 上，当服务器发生异常宕机时，可以重放 HLog 来恢复数据。</p>
 
                 
               </div>
@@ -346,7 +351,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Apache-Paimon/" class="category-chain-item">Apache Paimon</a>
+  <a href="/categories/HBase/" class="category-chain-item">HBase</a>
   
   
 
@@ -361,7 +366,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/Apache-Paimon/" class="print-no-link">#Apache Paimon</a>
+        <a href="/tags/HBase/" class="print-no-link">#HBase</a>
       
     </div>
   
@@ -373,8 +378,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Apache Paimon -- 介绍</div>
-      <div>http://example.com/2023/10/17/paimon/Apache Paimon -- 介绍/</div>
+      <div>Hbase -- 架构组成</div>
+      <div>http://example.com/2023/10/09/bigDataComponents/Hbase -- 架构组成/</div>
     </div>
     <div class="license-meta">
       
@@ -386,7 +391,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年10月17日</div>
+          <div>2023年10月9日</div>
         </div>
       
       
@@ -418,9 +423,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/10/17/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E5%B8%83%E5%B1%80/" title="Apache Paimon -- 文件布局">
+                      <a href="/2023/10/09/bigDataComponents/Hbase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Hbase -- 数据模型">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Apache Paimon -- 文件布局</span>
+                        <span class="hidden-mobile">Hbase -- 数据模型</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -428,8 +433,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/10/09/bigDataComponents/Hbase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Hbase -- 数据模型">
-                        <span class="hidden-mobile">Hbase -- 数据模型</span>
+                      <a href="/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/" title="JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发">
+                        <span class="hidden-mobile">JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
