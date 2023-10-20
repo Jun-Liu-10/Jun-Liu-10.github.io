@@ -104,48 +104,23 @@
   
   
   <entry>
-    <title>Hbase -- 数据模型</title>
-    <link href="/2023/10/09/bigDataComponents/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/"/>
-    <url>/2023/10/09/bigDataComponents/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/</url>
+    <title>LSM</title>
+    <link href="/2023/10/09/database/LSM/"/>
+    <url>/2023/10/09/database/LSM/</url>
     
-    <content type="html"><![CDATA[<p>Hbase 是一个面向<strong>列式存储</strong>的分布式数据库，其设计思想来源于 Google 的 BigTable 论文。Hbase 底层存储基于 HDFS 实现，集群的管理基于 ZooKeeper 实现。</p><p>Hbase 良好的分布式架构设计为海量数据的快速存储、随机访问提供了可能，基于<strong>数据副本机制</strong>和<strong>分区机制</strong>可以轻松实现在线扩容、缩容和数据容灾，是大数据领域中 Key - Value 数据结构存储最常用的数据库方案。</p><h2 id="1-特点"><a href="#1-特点" class="headerlink" title="1 特点"></a>1 特点</h2><h3 id="易扩展"><a href="#易扩展" class="headerlink" title="易扩展"></a>易扩展</h3><p>Hbase 的扩展性体现在两个方面：一是基于运算能力（RegionServer）的扩展，通过增加 RegionServer 节点的数量，提升 Hbase 上层的处理能力；另一个是基于存储能力的扩展（HDFS）通过增加 DataNode 节点数量对存储层的进行扩容，提升 HBase 的数据存储能力。</p><h3 id="海量存储"><a href="#海量存储" class="headerlink" title="海量存储"></a>海量存储</h3><p>HBase 作为一个开源的分布式 Key-Value 数据库，其主要作用是面向 PB 级别数据的实时入库和快速随机访问。这主要源于上述易扩展的特点，使得 HBase 通过扩展来存储海量的数据。</p><h3 id="列式存储"><a href="#列式存储" class="headerlink" title="列式存储"></a>列式存储</h3><p>Hbase 是根据列族来存储数据的。列族下面可以有非常多的列。列式存储的最大好处就是，其数据在表中是按照某列存储的，这样在查询只需要少数几个字段时，能大大减少读取的数据量。</p><h3 id="高可靠性"><a href="#高可靠性" class="headerlink" title="高可靠性"></a>高可靠性</h3><p>WAL 机制保证了数据写入时不会因集群异常而导致写入数据丢失，Replication 机制保证了在集群出现严重的问题时，数据不会发生丢失或损坏。而且 Hbase 底层使用 HDFS，HDFS 本身也有备份。</p><h3 id="稀疏性"><a href="#稀疏性" class="headerlink" title="稀疏性"></a>稀疏性</h3><p>在 HBase 的列族中，可以指定任意多的列，为空的列不占用存储空间，表可以设计得非常稀疏。</p><h2 id="2-模块组成"><a href="#2-模块组成" class="headerlink" title="2 模块组成"></a>2 模块组成</h2><p>HBase 可以将数据存储在本地文件系统，也可以存储在 HDFS 文件系统。在生产环境中，HBase 一般运行在 HDFS 上，以 HDFS 作为基础的存储设施。HBase 通过 HBase Client 提供的 Java API 来访问 HBase 数据库，以完成数据的写入和读取。HBase 集群主由HMaster、Region Server 和 ZooKeeper 组成。<br><img src="/img/bigDataComponents/hbase/hbase-architecture-1.png"></p><h3 id="HMaster"><a href="#HMaster" class="headerlink" title="HMaster"></a>HMaster</h3><ul><li>负责管理 RegionServer，实现其负载均衡；</li><li>管理和分配 Region，比如在 Region split时分配新的 Region，在 RegionServer 退出时迁移其内的 Region 到其他 RegionServer上；</li><li>管理namespace和table的元数据（实际存储在HDFS上）；</li><li>权限控制（ACL）。</li></ul><h3 id="RegionServer"><a href="#RegionServer" class="headerlink" title="RegionServer"></a>RegionServer</h3><ul><li>存放和管理本地 Region；</li><li>读写HDFS，管理Table中的数据；</li><li>Client 从 HMaster 中获取元数据，找到 RowKey 所在的 RegionServer 进行读写数据。</li></ul><h3 id="ZooKeeper"><a href="#ZooKeeper" class="headerlink" title="ZooKeeper"></a>ZooKeeper</h3><ul><li>存放整个 HBase集群的元数据以及集群的状态信息；</li><li>实现HMaster主从节点的failover。</li></ul><h2 id="3-数据模型"><a href="#3-数据模型" class="headerlink" title="3 数据模型"></a>3 数据模型</h2><p>前面我们有讲过 HBase 是一个面向列式存储的分布式数据库，它的数据模型与 BigTable 十分相似。在 HBase 表中，一条数据拥有一个全局唯一的键(RowKey)和任意数量的列(Column)，一列或多列组成一个列族(Column Family)，同一个列族中列的数据在物理上都存储在同一个 HFile 中，这样基于列存储的数据结构有利于数据缓存和查询。</p><p>同时，HBase 会将表按主键划分为多个 Region 存储在不同 Region Server 上，以完成数据的分布式存储和读取。<br><img src="/img/bigDataComponents/hbase/hbase-architecture-2.png"></p><h3 id="Column-Family"><a href="#Column-Family" class="headerlink" title="Column Family"></a>Column Family</h3><p>一般同一类的列会放在一个列族中，每个列族都有一组存储属性：</p><ul><li>是否应该缓存在内存中；</li><li>数据如何被压缩或行键如何编码等。</li></ul><p>HBase 在创建表的时候就必须指定列族。HBase 的列族不是越多越好，官方推荐一个表的列族数量最好小于或者等于3，过多的列族不利于 HBase 数据的管理和索引。</p><h3 id="RowKey"><a href="#RowKey" class="headerlink" title="RowKey"></a>RowKey</h3><p>RowKey 的概念与关系型数据库中的主键相似，HBase 使用 RowKey 来唯一标识某行的数据。</p><p>访问 HBase 数据的方式有三种：</p><ul><li>基于 RowKey的单行查询；</li><li>基于RowKey的范围查询；</li><li>全表扫描查询。</li></ul><h3 id="Region"><a href="#Region" class="headerlink" title="Region"></a>Region</h3><p>HBase 按照行的方向将表中的数据基于 RowKey 的不同范围划分到不同 Region 上，每个Region都负责一定范围的数据存储和访问。<br><img src="/img/bigDataComponents/hbase/hbase-3.png"></p><p>每个表一开始只有一个 Region，随着数据不断插入表，Region 不断增大，当增大到一个阀值的时候，Region 就会等分成两个新的 Region。当table中的行不断增多，就会有越来越多的 Region。</p><p>另外，Region 是 Hbase 中分布式存储和负载均衡的最小单元，不同的 Region 可以分布在不同的 Region Server上。但一个 Region 是不会拆分到多个 Server 上的。</p><p>这样即使有一个包括上百亿条数据的表，由于数据被划分到不同的 Region上，每个 Region 都可以独立地进行写入和查询，HBase 写入或者查询的时候可以基于多 Region 分布式并发操作，因此访问速度也不会有太大的降低。</p><h3 id="TimeStamp"><a href="#TimeStamp" class="headerlink" title="TimeStamp"></a>TimeStamp</h3><p>TimeStamp 是实现 HBase 多版本的关键。在HBase 中，使用不同 TimeStamp 来标识相同RowKey对应的不同版本的数据。相同 RowKey的数据按照 TimeStamp 倒序排列。默认查询的是最新的版本，当然用户也可以指定 TimeStamp 的值来读取指定版本的数据。</p>]]></content>
+    <content type="html"><![CDATA[<p><img src="https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif" alt="Alt Text"><br><img src="/img/bigDataComponents/demo-gif.gif" alt="Alt Text"></p><p><img src="/img/bigDataComponents/mov-test.mov"></p>]]></content>
     
     
     <categories>
       
-      <category>Hbase</category>
+      <category>LSM</category>
       
     </categories>
     
     
     <tags>
       
-      <tag>Hbase</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>HBase -- 架构组成</title>
-    <link href="/2023/10/09/bigDataComponents/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/"/>
-    <url>/2023/10/09/bigDataComponents/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/</url>
-    
-    <content type="html"><![CDATA[<p>HBase 的核心架构由五部分组成，分别是 <code>HBase Client</code>、<code>HMaster</code>、<code>Region Server</code>、<code>ZooKeeper</code> 以及 <code>HDFS</code>。它的架构组成如下图所示。<br><img src="/img/bigDataComponents/hbase/hbase-4.png"></p><p>下面我们对 HBase 架构组成的每一部分详细介绍一下。</p><h2 id="HBase-Client"><a href="#HBase-Client" class="headerlink" title="HBase Client"></a>HBase Client</h2><p>HBase Client 为用户提供了访问 HBase 的接口，可以通过元数据表来定位到目标数据的 RegionServer，另外 HBase Client 还维护了对应的 cache 来加速 Hbase 的访问，比如缓存元数据的信息。</p><h2 id="HMaster"><a href="#HMaster" class="headerlink" title="HMaster"></a>HMaster</h2><p>HMaster 是 HBase 集群的主节点，负责整个集群的管理工作，主要工作职责如下：</p><ul><li><p>分配Region：负责启动的时候分配Region到具体的 RegionServer；</p></li><li><p>负载均衡：一方面负责将用户的数据均衡地分布在各个 Region Server 上，防止Region Server数据倾斜过载。另一方面负责将用户的请求均衡地分布在各个 Region Server 上，防止Region Server 请求过热；</p></li><li><p>维护数据：发现失效的 Region，并将失效的 Region 分配到正常的 RegionServer 上，并且在Region Sever 失效的时候，协调对应的HLog进行任务的拆分。</p></li></ul><h2 id="Region-Server"><a href="#Region-Server" class="headerlink" title="Region Server"></a>Region Server</h2><p>Region Server 直接对接用户的读写请求，是真正的干活的节点，主要工作职责如下。</p><ul><li><p>管理 HMaster 为其分配的 Region；</p></li><li><p>负责与底层的 HDFS 交互，存储数据到 HDFS；</p></li><li><p>负责 Region 变大以后的拆分以及 StoreFile 的合并工作。</p></li></ul><p>与 HMaster 的协同：当某个 RegionServer 宕机之后，ZK 会通知 Master 进行失效备援。下线的 RegionServer 所负责的 Region 暂时停止对外提供服务，Master 会将该 RegionServer 所负责的 Region 转移到其他 RegionServer 上，并且会对所下线的 RegionServer 上存在 MemStore 中还未持久化到磁盘中的数据由 Hlog 重播进行恢复。</p><p>下面给大家详细介绍下 Region Serve数据存储的基本结构，如下图所示。一个 Region Server 是包含多个 Region 的，这里仅展示一个。<br><img src="/img/bigDataComponents/hbase/hbase-5.png"></p><ul><li><p>Region：每一个 Region 都有起始 RowKey 和结束 RowKey，代表了存储的Row的范围，保存着表中某段连续的数据。一开始每个表都只有一个 Region，随着数据量不断增加，当 Region 大小达到一个阀值时，Region 就会被 Regio Server 水平切分成两个新的 Region。当 Region 很多时，HMaster 会将 Region 保存到其他 Region Server 上。</p></li><li><p>Store：一个 Region 由多个 Store 组成，每个 Store 都对应一个 Column Family, Store 包含 MemStore 和 StoreFile。</p><ul><li>MemStore：作为HBase的内存数据存储，数据的写操作会先写到 MemStore 中，当MemStore 中的数据增长到一个阈值（默认64M）后，Region Server 会启动 flasheatch 进程将 MemStore 中的数据写入 StoreFile 持久化存储，每次写入后都形成一个单独的 StoreFile。当客户端检索数据时，先在 MemStore中查找，如果MemStore 中不存在，则会在 StoreFile 中继续查找。</li><li>StoreFile：MemStore 内存中的数据写到文件后就是StoreFile，StoreFile底层是以 HFile 的格式保存。HBase以Store的大小来判断是否需要切分Region。当一个Region 中所有 StoreFile 的大小和数量都增长到超过一个阈值时，HMaster 会把当前Region分割为两个，并分配到其他 Region Server 上，实现负载均衡。</li></ul></li><li><p>HFile：HFile 和 StoreFile 是同一个文件，只不过站在 HDFS 的角度称这个文件为HFile，站在HBase的角度就称这个文件为StoreFile。</p></li><li><p>HLog：负责记录着数据的操作日志，当HBase出现故障时可以进行日志重放、故障恢复。例如，磁盘掉电导致 MemStore中的数据没有持久化存储到 StoreFile，这时就可以通过HLog日志重放来恢复数据。</p></li></ul><h2 id="ZooKeeper"><a href="#ZooKeeper" class="headerlink" title="ZooKeeper"></a>ZooKeeper</h2><p>HBase 通过 ZooKeeper 来完成选举 HMaster、监控 Region Server、维护元数据集群配置等工作，主要工作职责如下：</p><ul><li><p>选举HMaster：通ooKeeper来保证集中有1HMaster在运行，如果 HMaster 异常，则会通过选举机制产生新的 HMaster 来提供服务；</p></li><li><p>监控Region Server: 通过 ZooKeeper 来监控 Region Server 的状态，当Region Server 有异常的时候，通过回调的形式通知 HMaster 有关Region Server 上下线的信息；</p></li><li><p>维护元数据和集群配置：通过ZooKeeper储B信息并对外提供访问接口。</p></li></ul><h2 id="HDFS"><a href="#HDFS" class="headerlink" title="HDFS"></a>HDFS</h2><p>HDFS 为 HBase 提供底层数据存储服务，同时为 HBase提供高可用的支持， HBase 将 HLog 存储在 HDFS 上，当服务器发生异常宕机时，可以重放 HLog 来恢复数据。</p>]]></content>
-    
-    
-    <categories>
-      
-      <category>HBase</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>HBase</tag>
+      <tag>LSM</tag>
       
     </tags>
     
@@ -155,8 +130,8 @@
   
   <entry>
     <title>HBase -- 读写流程</title>
-    <link href="/2023/10/09/bigDataComponents/HBase%20--%20%E8%AF%BB%E5%86%99%E6%B5%81%E7%A8%8B/"/>
-    <url>/2023/10/09/bigDataComponents/HBase%20--%20%E8%AF%BB%E5%86%99%E6%B5%81%E7%A8%8B/</url>
+    <link href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E8%AF%BB%E5%86%99%E6%B5%81%E7%A8%8B/"/>
+    <url>/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E8%AF%BB%E5%86%99%E6%B5%81%E7%A8%8B/</url>
     
     <content type="html"><![CDATA[<h2 id="HBase-写流程"><a href="#HBase-写流程" class="headerlink" title="HBase 写流程"></a>HBase 写流程</h2><p><img src="/img/bigDataComponents/hbase/hbase-6.png"></p><h3 id="Region-Server-寻址"><a href="#Region-Server-寻址" class="headerlink" title="Region Server 寻址"></a>Region Server 寻址</h3><ol><li>HBase Client 访问 ZooKeeper；</li><li>获取写入 Region 所在的位置，即获取 hbase:meta 表位于哪个 Region Server；</li><li>访问对应的 Region Server；</li><li>获取 hbase:meta 表，并查询出目标数据位于哪个 Region Server 中的哪个 Region 中。并将该 table 的 Region 信息以及 meta 表的位置信息缓存在客户端的 meta cache，方便下次访问；</li></ol><h3 id="写-Hlog"><a href="#写-Hlog" class="headerlink" title="写 Hlog"></a>写 Hlog</h3><ol start="5"><li>HBase Client 向 Region Server 发送写 Hlog 请求；</li><li>Region Server 会通过顺序写入磁盘的方式，将 Hlog 存储在 HDFS 上；</li></ol><h3 id="写-MemStore-并返回结果"><a href="#写-MemStore-并返回结果" class="headerlink" title="写 MemStore 并返回结果"></a>写 MemStore 并返回结果</h3><ol start="7"><li>HBase Client 向 Region Server 发送写 MemStore 请求；</li><li>只有当写 Hlog 和写 MemStore 的请求都成功完成之后，并将反馈给 HBase Client，这时对于整个 HBase Client 写入流程已经完成。</li></ol><h3 id="MemStore-刷盘"><a href="#MemStore-刷盘" class="headerlink" title="MemStore 刷盘"></a>MemStore 刷盘</h3><p>HBase 会根据 MemStore 配置的刷盘策略定时将数据刷新到 StoreFile 中，完成数据持久化存储。</p><h3 id="为什么要把-WAL-加载到-MemStore中，再刷写成-HFile-呢？"><a href="#为什么要把-WAL-加载到-MemStore中，再刷写成-HFile-呢？" class="headerlink" title="为什么要把 WAL 加载到 MemStore中，再刷写成 HFile 呢？"></a>为什么要把 WAL 加载到 MemStore中，再刷写成 HFile 呢？</h3><p>WAL (Write-Ahead-Log) 预写日志是 HBase 的 RegionServer 在处理数据插入和删除过程中用来记录操作内容的一种日志，WAL的实现类是Hlog。每次Put、Delete等一条记录时，首先将其数据写入到 RegionServer 对应的 HLog 文件中去。</p><p>用户更新数据必须先被记入日志（Hlog）后才能写入 MemStore 缓存，当缓存内容对应的日志已经被写入磁盘后，即日志写成功后，缓存的内容才会被写入磁盘。</p><p>而WAL是保存在HDFS上的持久化文件，数据到达 Region 时先写入 WAL，然后被加载到 MemStore 中。这样就算Region宕机了，操作没来得及执行持久化，也可以再重启的时候从 WAL 加载操作并执行。</p><p>那么，我们从写入流程中可以看出，数据进入 HFile 之前就已经被持久化到 WAL了，而 WAL 就是在 HDFS 上的，MemStore 是在内存中的，增加 MemStore 并不能提高写入性能，为什么还要从 WAL 加载到 MemStore中，再刷写成 HFile 呢？</p><ul><li><p>数据需要顺序写入，但 HDFS 是不支持对数据进行修改的；</p></li><li><p>WAL 的持久化为了保证数据的安全性，是无序的；</p></li><li><p>Memstore在内存中维持数据按照row key顺序排列，从而顺序写入磁盘；</p></li></ul><p>所以 MemStore 的意义在于维持数据按照RowKey的字典序排列，而不是做一个缓存提高写入效率。</p><h2 id="HBase-读流程"><a href="#HBase-读流程" class="headerlink" title="HBase 读流程"></a>HBase 读流程</h2><p>下图为 HBase 的读取数据流程。<br><img src="/img/bigDataComponents/hbase/hbase-7.png"></p><h3 id="Region-Server-寻址-1"><a href="#Region-Server-寻址-1" class="headerlink" title="Region Server 寻址"></a>Region Server 寻址</h3><ol><li>HBase Client 请求 ZooKeeper 获取元数据表所在的 Region Server的地址。</li></ol><h3 id="Region-寻址"><a href="#Region-寻址" class="headerlink" title="Region 寻址"></a>Region 寻址</h3><ol start="2"><li>HBase Client 请求 RegionServer 获取需要访问的元数据，查询出目标数据位于哪个 Region Server 中的哪个 Region 中。并将该 table 的 region 信息以 及 meta 表的位置信息缓存在客户端的 meta cache，方便下次访问。</li></ol><h3 id="数据读取"><a href="#数据读取" class="headerlink" title="数据读取"></a>数据读取</h3><ol start="3"><li>HBase Client 请求数据所在的 Region Server，获取所需要的数据。Region 首先在 MemStore 中查找，若命中则返回；如果在MemStore 中找不到，则通过 BloomFilter 判断数据是否存在；如果存在，则在:StoreFile 中扫描并将结果返回客户端。</li></ol>]]></content>
     
@@ -179,23 +154,73 @@
   
   
   <entry>
-    <title>LSM</title>
-    <link href="/2023/10/09/database/LSM/"/>
-    <url>/2023/10/09/database/LSM/</url>
+    <title>HBase -- 架构组成</title>
+    <link href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/"/>
+    <url>/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/</url>
     
-    <content type="html"><![CDATA[<p>![](&#x2F;img&#x2F;bigDataComponents&#x2F;Oct-19-2023 13-58-43.gif)</p>]]></content>
+    <content type="html"><![CDATA[<p>HBase 的核心架构由五部分组成，分别是 <code>HBase Client</code>、<code>HMaster</code>、<code>Region Server</code>、<code>ZooKeeper</code> 以及 <code>HDFS</code>。它的架构组成如下图所示。<br><img src="/img/bigDataComponents/hbase/hbase-4.png"></p><p>下面我们对 HBase 架构组成的每一部分详细介绍一下。</p><h2 id="HBase-Client"><a href="#HBase-Client" class="headerlink" title="HBase Client"></a>HBase Client</h2><p>HBase Client 为用户提供了访问 HBase 的接口，可以通过元数据表来定位到目标数据的 RegionServer，另外 HBase Client 还维护了对应的 cache 来加速 Hbase 的访问，比如缓存元数据的信息。</p><h2 id="HMaster"><a href="#HMaster" class="headerlink" title="HMaster"></a>HMaster</h2><p>HMaster 是 HBase 集群的主节点，负责整个集群的管理工作，主要工作职责如下：</p><ul><li><p>分配Region：负责启动的时候分配Region到具体的 RegionServer；</p></li><li><p>负载均衡：一方面负责将用户的数据均衡地分布在各个 Region Server 上，防止Region Server数据倾斜过载。另一方面负责将用户的请求均衡地分布在各个 Region Server 上，防止Region Server 请求过热；</p></li><li><p>维护数据：发现失效的 Region，并将失效的 Region 分配到正常的 RegionServer 上，并且在Region Sever 失效的时候，协调对应的HLog进行任务的拆分。</p></li></ul><h2 id="Region-Server"><a href="#Region-Server" class="headerlink" title="Region Server"></a>Region Server</h2><p>Region Server 直接对接用户的读写请求，是真正的干活的节点，主要工作职责如下。</p><ul><li><p>管理 HMaster 为其分配的 Region；</p></li><li><p>负责与底层的 HDFS 交互，存储数据到 HDFS；</p></li><li><p>负责 Region 变大以后的拆分以及 StoreFile 的合并工作。</p></li></ul><p>与 HMaster 的协同：当某个 RegionServer 宕机之后，ZK 会通知 Master 进行失效备援。下线的 RegionServer 所负责的 Region 暂时停止对外提供服务，Master 会将该 RegionServer 所负责的 Region 转移到其他 RegionServer 上，并且会对所下线的 RegionServer 上存在 MemStore 中还未持久化到磁盘中的数据由 Hlog 重播进行恢复。</p><p>下面给大家详细介绍下 Region Serve数据存储的基本结构，如下图所示。一个 Region Server 是包含多个 Region 的，这里仅展示一个。<br><img src="/img/bigDataComponents/hbase/hbase-5.png"></p><ul><li><p>Region：每一个 Region 都有起始 RowKey 和结束 RowKey，代表了存储的Row的范围，保存着表中某段连续的数据。一开始每个表都只有一个 Region，随着数据量不断增加，当 Region 大小达到一个阀值时，Region 就会被 Regio Server 水平切分成两个新的 Region。当 Region 很多时，HMaster 会将 Region 保存到其他 Region Server 上。</p></li><li><p>Store：一个 Region 由多个 Store 组成，每个 Store 都对应一个 Column Family, Store 包含 MemStore 和 StoreFile。</p><ul><li>MemStore：作为HBase的内存数据存储，数据的写操作会先写到 MemStore 中，当MemStore 中的数据增长到一个阈值（默认64M）后，Region Server 会启动 flasheatch 进程将 MemStore 中的数据写入 StoreFile 持久化存储，每次写入后都形成一个单独的 StoreFile。当客户端检索数据时，先在 MemStore中查找，如果MemStore 中不存在，则会在 StoreFile 中继续查找。</li><li>StoreFile：MemStore 内存中的数据写到文件后就是StoreFile，StoreFile底层是以 HFile 的格式保存。HBase以Store的大小来判断是否需要切分Region。当一个Region 中所有 StoreFile 的大小和数量都增长到超过一个阈值时，HMaster 会把当前Region分割为两个，并分配到其他 Region Server 上，实现负载均衡。</li></ul></li><li><p>HFile：HFile 和 StoreFile 是同一个文件，只不过站在 HDFS 的角度称这个文件为HFile，站在HBase的角度就称这个文件为StoreFile。</p></li><li><p>HLog：负责记录着数据的操作日志，当HBase出现故障时可以进行日志重放、故障恢复。例如，磁盘掉电导致 MemStore中的数据没有持久化存储到 StoreFile，这时就可以通过HLog日志重放来恢复数据。</p></li></ul><h2 id="ZooKeeper"><a href="#ZooKeeper" class="headerlink" title="ZooKeeper"></a>ZooKeeper</h2><p>HBase 通过 ZooKeeper 来完成选举 HMaster、监控 Region Server、维护元数据集群配置等工作，主要工作职责如下：</p><ul><li><p>选举HMaster：通ooKeeper来保证集中有1HMaster在运行，如果 HMaster 异常，则会通过选举机制产生新的 HMaster 来提供服务；</p></li><li><p>监控Region Server: 通过 ZooKeeper 来监控 Region Server 的状态，当Region Server 有异常的时候，通过回调的形式通知 HMaster 有关Region Server 上下线的信息；</p></li><li><p>维护元数据和集群配置：通过ZooKeeper储B信息并对外提供访问接口。</p></li></ul><h2 id="HDFS"><a href="#HDFS" class="headerlink" title="HDFS"></a>HDFS</h2><p>HDFS 为 HBase 提供底层数据存储服务，同时为 HBase提供高可用的支持， HBase 将 HLog 存储在 HDFS 上，当服务器发生异常宕机时，可以重放 HLog 来恢复数据。</p>]]></content>
     
     
     <categories>
       
-      <category>LSM</category>
+      <category>HBase</category>
       
     </categories>
     
     
     <tags>
       
-      <tag>LSM</tag>
+      <tag>HBase</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Hbase -- 数据模型</title>
+    <link href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/"/>
+    <url>/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/</url>
+    
+    <content type="html"><![CDATA[<p>Hbase 是一个面向<strong>列式存储</strong>的分布式数据库，其设计思想来源于 Google 的 BigTable 论文。Hbase 底层存储基于 HDFS 实现，集群的管理基于 ZooKeeper 实现。</p><p>Hbase 良好的分布式架构设计为海量数据的快速存储、随机访问提供了可能，基于<strong>数据副本机制</strong>和<strong>分区机制</strong>可以轻松实现在线扩容、缩容和数据容灾，是大数据领域中 Key - Value 数据结构存储最常用的数据库方案。</p><h2 id="1-特点"><a href="#1-特点" class="headerlink" title="1 特点"></a>1 特点</h2><h3 id="易扩展"><a href="#易扩展" class="headerlink" title="易扩展"></a>易扩展</h3><p>Hbase 的扩展性体现在两个方面：一是基于运算能力（RegionServer）的扩展，通过增加 RegionServer 节点的数量，提升 Hbase 上层的处理能力；另一个是基于存储能力的扩展（HDFS）通过增加 DataNode 节点数量对存储层的进行扩容，提升 HBase 的数据存储能力。</p><h3 id="海量存储"><a href="#海量存储" class="headerlink" title="海量存储"></a>海量存储</h3><p>HBase 作为一个开源的分布式 Key-Value 数据库，其主要作用是面向 PB 级别数据的实时入库和快速随机访问。这主要源于上述易扩展的特点，使得 HBase 通过扩展来存储海量的数据。</p><h3 id="列式存储"><a href="#列式存储" class="headerlink" title="列式存储"></a>列式存储</h3><p>Hbase 是根据列族来存储数据的。列族下面可以有非常多的列。列式存储的最大好处就是，其数据在表中是按照某列存储的，这样在查询只需要少数几个字段时，能大大减少读取的数据量。</p><h3 id="高可靠性"><a href="#高可靠性" class="headerlink" title="高可靠性"></a>高可靠性</h3><p>WAL 机制保证了数据写入时不会因集群异常而导致写入数据丢失，Replication 机制保证了在集群出现严重的问题时，数据不会发生丢失或损坏。而且 Hbase 底层使用 HDFS，HDFS 本身也有备份。</p><h3 id="稀疏性"><a href="#稀疏性" class="headerlink" title="稀疏性"></a>稀疏性</h3><p>在 HBase 的列族中，可以指定任意多的列，为空的列不占用存储空间，表可以设计得非常稀疏。</p><h2 id="2-模块组成"><a href="#2-模块组成" class="headerlink" title="2 模块组成"></a>2 模块组成</h2><p>HBase 可以将数据存储在本地文件系统，也可以存储在 HDFS 文件系统。在生产环境中，HBase 一般运行在 HDFS 上，以 HDFS 作为基础的存储设施。HBase 通过 HBase Client 提供的 Java API 来访问 HBase 数据库，以完成数据的写入和读取。HBase 集群主由HMaster、Region Server 和 ZooKeeper 组成。<br><img src="/img/bigDataComponents/hbase/hbase-architecture-1.png"></p><h3 id="HMaster"><a href="#HMaster" class="headerlink" title="HMaster"></a>HMaster</h3><ul><li>负责管理 RegionServer，实现其负载均衡；</li><li>管理和分配 Region，比如在 Region split时分配新的 Region，在 RegionServer 退出时迁移其内的 Region 到其他 RegionServer上；</li><li>管理namespace和table的元数据（实际存储在HDFS上）；</li><li>权限控制（ACL）。</li></ul><h3 id="RegionServer"><a href="#RegionServer" class="headerlink" title="RegionServer"></a>RegionServer</h3><ul><li>存放和管理本地 Region；</li><li>读写HDFS，管理Table中的数据；</li><li>Client 从 HMaster 中获取元数据，找到 RowKey 所在的 RegionServer 进行读写数据。</li></ul><h3 id="ZooKeeper"><a href="#ZooKeeper" class="headerlink" title="ZooKeeper"></a>ZooKeeper</h3><ul><li>存放整个 HBase集群的元数据以及集群的状态信息；</li><li>实现HMaster主从节点的failover。</li></ul><h2 id="3-数据模型"><a href="#3-数据模型" class="headerlink" title="3 数据模型"></a>3 数据模型</h2><p>前面我们有讲过 HBase 是一个面向列式存储的分布式数据库，它的数据模型与 BigTable 十分相似。在 HBase 表中，一条数据拥有一个全局唯一的键(RowKey)和任意数量的列(Column)，一列或多列组成一个列族(Column Family)，同一个列族中列的数据在物理上都存储在同一个 HFile 中，这样基于列存储的数据结构有利于数据缓存和查询。</p><p>同时，HBase 会将表按主键划分为多个 Region 存储在不同 Region Server 上，以完成数据的分布式存储和读取。<br><img src="/img/bigDataComponents/hbase/hbase-architecture-2.png"></p><h3 id="Column-Family"><a href="#Column-Family" class="headerlink" title="Column Family"></a>Column Family</h3><p>一般同一类的列会放在一个列族中，每个列族都有一组存储属性：</p><ul><li>是否应该缓存在内存中；</li><li>数据如何被压缩或行键如何编码等。</li></ul><p>HBase 在创建表的时候就必须指定列族。HBase 的列族不是越多越好，官方推荐一个表的列族数量最好小于或者等于3，过多的列族不利于 HBase 数据的管理和索引。</p><h3 id="RowKey"><a href="#RowKey" class="headerlink" title="RowKey"></a>RowKey</h3><p>RowKey 的概念与关系型数据库中的主键相似，HBase 使用 RowKey 来唯一标识某行的数据。</p><p>访问 HBase 数据的方式有三种：</p><ul><li>基于 RowKey的单行查询；</li><li>基于RowKey的范围查询；</li><li>全表扫描查询。</li></ul><h3 id="Region"><a href="#Region" class="headerlink" title="Region"></a>Region</h3><p>HBase 按照行的方向将表中的数据基于 RowKey 的不同范围划分到不同 Region 上，每个Region都负责一定范围的数据存储和访问。<br><img src="/img/bigDataComponents/hbase/hbase-3.png"></p><p>每个表一开始只有一个 Region，随着数据不断插入表，Region 不断增大，当增大到一个阀值的时候，Region 就会等分成两个新的 Region。当table中的行不断增多，就会有越来越多的 Region。</p><p>另外，Region 是 Hbase 中分布式存储和负载均衡的最小单元，不同的 Region 可以分布在不同的 Region Server上。但一个 Region 是不会拆分到多个 Server 上的。</p><p>这样即使有一个包括上百亿条数据的表，由于数据被划分到不同的 Region上，每个 Region 都可以独立地进行写入和查询，HBase 写入或者查询的时候可以基于多 Region 分布式并发操作，因此访问速度也不会有太大的降低。</p><h3 id="TimeStamp"><a href="#TimeStamp" class="headerlink" title="TimeStamp"></a>TimeStamp</h3><p>TimeStamp 是实现 HBase 多版本的关键。在HBase 中，使用不同 TimeStamp 来标识相同RowKey对应的不同版本的数据。相同 RowKey的数据按照 TimeStamp 倒序排列。默认查询的是最新的版本，当然用户也可以指定 TimeStamp 的值来读取指定版本的数据。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>Hbase</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Hbase</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Kafka -- 为什么 Kafka 很快？</title>
+    <link href="/2023/10/09/bigDataComponents/kafka/Kafka%20--%20%E4%B8%BA%E4%BB%80%E4%B9%88%20Kafka%20%E5%BE%88%E5%BF%AB%EF%BC%9F/"/>
+    <url>/2023/10/09/bigDataComponents/kafka/Kafka%20--%20%E4%B8%BA%E4%BB%80%E4%B9%88%20Kafka%20%E5%BE%88%E5%BF%AB%EF%BC%9F/</url>
+    
+    <content type="html"><![CDATA[<p>2011 年初，LinkedIn 开源了 Kafka，这是一个分布式事件流平台。它以作家弗朗茨-卡夫卡（Franz Kafka）的名字命名。顾名思义，Kafka 是为写而优化的。它为处理实时数据馈送提供了一个高吞吐量、低延迟的平台，在互联网公司中得到广泛应用。</p><p>有许多设计决策对 Kafka 的性能做出了贡献。在这篇文章中，我们将重点关注两个。我们认为这两者最有分量。</p><p><img src="/img/bigDataComponents/kafka/why_is_kafka_fast.jpeg"></p><ol><li><strong>Kafka 依赖于顺序 I&#x2F;O；</strong></li><li><strong>零拷贝机制。</strong></li></ol><p>该图说明了数据如何在生产者和消费者之间传输，以及零拷贝的含义。</p><ul><li><p>Step 1.1 - 1.3：生产者将数据写入磁盘；</p></li><li><p>Step 2: 消费者读取数据，不使用零拷贝技术 </p><ul><li>2.1: 数据从磁盘加载到操作系统缓存</li><li>2.2 数据从操作系统缓存复制到 Kafka进程</li><li>2.3 Kafka进程将数据复制到套接字缓冲区 (Socket Buffer)</li><li>2.4 数据从套接字缓冲区复制到网卡</li><li>2.5 网卡向用户发送数据</li></ul></li><li><p>Step 3：消费者使用零拷贝技术读取数据 </p><ul><li>3.1: 数据从磁盘加载到操作系统缓存</li><li>3.2 操作系统缓存通过 sendfile() 命令直接将数据复制到网卡</li><li>3.3 网卡向用户发送数据</li></ul></li></ul><p>零拷贝节省了应用程序和内核上下文之间多次数据拷贝。 这种方法可将时间缩短约 65% 。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>Kafka</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Kafka</tag>
       
     </tags>
     

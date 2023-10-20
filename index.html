@@ -480,15 +480,15 @@
         
           <i class="index-pin iconfont icon-top" title="Pin on top"></i>
         
-        <a href="/2023/10/09/bigDataComponents/HBase%20--%20%E8%AF%BB%E5%86%99%E6%B5%81%E7%A8%8B/" target="_self">
-          HBase -- 读写流程
+        <a href="/2023/10/09/bigDataComponents/kafka/Kafka%20--%20%E4%B8%BA%E4%BB%80%E4%B9%88%20Kafka%20%E5%BE%88%E5%BF%AB%EF%BC%9F/" target="_self">
+          Kafka -- 为什么 Kafka 很快？
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/09/bigDataComponents/HBase%20--%20%E8%AF%BB%E5%86%99%E6%B5%81%E7%A8%8B/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/09/bigDataComponents/kafka/Kafka%20--%20%E4%B8%BA%E4%BB%80%E4%B9%88%20Kafka%20%E5%BE%88%E5%BF%AB%EF%BC%9F/" target="_self">
         <div>
-          HBase 写流程 Region Server 寻址 HBase Client 访问 ZooKeeper； 获取写入 Region 所在的位置，即获取 hbase:meta 表位于哪个 Region Server； 访问对应的 Region Server； 获取 hbase:meta 表，并查询出目标数据位于哪个 Region Server 中的哪个 Region 中。并将该 table 的 Re
+          2011 年初，LinkedIn 开源了 Kafka，这是一个分布式事件流平台。它以作家弗朗茨-卡夫卡（Franz Kafka）的名字命名。顾名思义，Kafka 是为写而优化的。它为处理实时数据馈送提供了一个高吞吐量、低延迟的平台，在互联网公司中得到广泛应用。 有许多设计决策对 Kafka 的性能做出了贡献。在这篇文章中，我们将重点关注两个。我们认为这两者最有分量。   Kafka 依赖于顺序 I
         </div>
       </a>
 
@@ -512,7 +512,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/HBase/" class="category-chain-item">HBase</a>
+  <a href="/categories/Kafka/" class="category-chain-item">Kafka</a>
   
   
 
@@ -527,7 +527,7 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/HBase/">#HBase</a>
+              <a href="/tags/Kafka/">#Kafka</a>
             
           </div>
         
@@ -543,15 +543,15 @@
         
           <i class="index-pin iconfont icon-top" title="Pin on top"></i>
         
-        <a href="/2023/10/09/bigDataComponents/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/" target="_self">
-          HBase -- 架构组成
+        <a href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E8%AF%BB%E5%86%99%E6%B5%81%E7%A8%8B/" target="_self">
+          HBase -- 读写流程
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/09/bigDataComponents/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E8%AF%BB%E5%86%99%E6%B5%81%E7%A8%8B/" target="_self">
         <div>
-          HBase 的核心架构由五部分组成，分别是 HBase Client、HMaster、Region Server、ZooKeeper 以及 HDFS。它的架构组成如下图所示。 下面我们对 HBase 架构组成的每一部分详细介绍一下。 HBase ClientHBase Client 为用户提供了访问 HBase 的接口，可以通过元数据表来定位到目标数据的 RegionServer，另外 HBase
+          HBase 写流程 Region Server 寻址 HBase Client 访问 ZooKeeper； 获取写入 Region 所在的位置，即获取 hbase:meta 表位于哪个 Region Server； 访问对应的 Region Server； 获取 hbase:meta 表，并查询出目标数据位于哪个 Region Server 中的哪个 Region 中。并将该 table 的 Re
         </div>
       </a>
 
@@ -614,7 +614,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/2023/10/09/database/LSM/" target="_self">
         <div>
-          ![](&#x2F;img&#x2F;bigDataComponents&#x2F;Oct-19-2023 13-58-43.gif)
+          
         </div>
       </a>
 
@@ -669,13 +669,76 @@
         
           <i class="index-pin iconfont icon-top" title="Pin on top"></i>
         
-        <a href="/2023/10/09/bigDataComponents/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" target="_self">
+        <a href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/" target="_self">
+          HBase -- 架构组成
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E6%9E%B6%E6%9E%84%E7%BB%84%E6%88%90/" target="_self">
+        <div>
+          HBase 的核心架构由五部分组成，分别是 HBase Client、HMaster、Region Server、ZooKeeper 以及 HDFS。它的架构组成如下图所示。 下面我们对 HBase 架构组成的每一部分详细介绍一下。 HBase ClientHBase Client 为用户提供了访问 HBase 的接口，可以通过元数据表来定位到目标数据的 RegionServer，另外 HBase
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-10-09 13:14" pubdate>
+              2023-10-09
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/HBase/" class="category-chain-item">HBase</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/HBase/">#HBase</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
+        
+        <a href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" target="_self">
           Hbase -- 数据模型
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/09/bigDataComponents/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" target="_self">
         <div>
           Hbase 是一个面向列式存储的分布式数据库，其设计思想来源于 Google 的 BigTable 论文。Hbase 底层存储基于 HDFS 实现，集群的管理基于 ZooKeeper 实现。 Hbase 良好的分布式架构设计为海量数据的快速存储、随机访问提供了可能，基于数据副本机制和分区机制可以轻松实现在线扩容、缩容和数据容灾，是大数据领域中 Key - Value 数据结构存储最常用的数据库方案
         </div>
@@ -780,69 +843,6 @@
             <i class="iconfont icon-tags"></i>
             
               <a href="/tags/Flink-StarRocks/">#Flink + StarRocks</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-          <i class="index-pin iconfont icon-top" title="Pin on top"></i>
-        
-        <a href="/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/" target="_self">
-          JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/" target="_self">
-        <div>
-          1 背景 &amp; 需求最近工作中遇到了一个场景：需要将多个 zip 包中的文件解压之后上传到 hdfs，串行解压上传的速度非常慢；需要改造成并行执行。 2 实现：CompletableFuture + 自定义线程池12345678910111213141516171819202122232425262728293031@Slf4j@Componentpublic class DataCheck
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2023-10-07 10:14" pubdate>
-              2023-10-07
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/JAVA-%E5%9F%BA%E7%A1%80/" class="category-chain-item">JAVA 基础</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/JAVA-%E5%9F%BA%E7%A1%80/">#JAVA 基础</a>
             
           </div>
         
