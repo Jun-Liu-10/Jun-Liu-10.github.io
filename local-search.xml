@@ -4,6 +4,31 @@
   
   
   <entry>
+    <title>LSM Tree -- NoSQL 数据库背后的秘密</title>
+    <link href="/2023/10/21/database/LSM%20Tree%20--%20NoSQL%20%E6%95%B0%E6%8D%AE%E5%BA%93%E8%83%8C%E5%90%8E%E7%9A%84%E7%A7%98%E5%AF%86/"/>
+    <url>/2023/10/21/database/LSM%20Tree%20--%20NoSQL%20%E6%95%B0%E6%8D%AE%E5%BA%93%E8%83%8C%E5%90%8E%E7%9A%84%E7%A7%98%E5%AF%86/</url>
+    
+    <content type="html"><![CDATA[<h2 id="1-LSM-Tree-读写流程与架构"><a href="#1-LSM-Tree-读写流程与架构" class="headerlink" title="1 LSM Tree 读写流程与架构"></a>1 LSM Tree 读写流程与架构</h2><p>许多 NoSQL 数据库背后的秘密武器，是一种称为 <code>LSM （Log structured merge tree）</code>的数据结构。LSM 树针对快速写入进行了优化。要了解 LSM 的工作原理，我们先看一下关系型数据库通常是如何存储数据的。<br><img src="/img/database/LSM.gif" alt="LSM"></p><p>关系型数据库中通常由称为 B 树的数据结构支持，B 树针对读进行了优化，更新 B 数的代价相对更高，因为它涉及随机 IO，并且可能更新磁盘上的多个页面，这限制了 B 树读取数据的速度。<br><img src="/img/database/b+tree.gif" alt="b+tree"></p><h3 id="LSM-Tree-写流程"><a href="#LSM-Tree-写流程" class="headerlink" title="LSM Tree 写流程"></a>LSM Tree 写流程</h3><p>LSM 树的工作原理不同，当数据写入时，先会到达称为 <code>Memtable</code> 的数据结构，在内存中进行批量处理，<code>Memtable</code> 按照 key 排序，<code>Memtable</code> 通常以平衡二叉树实现，当 <code>Memtable</code> 达到一定大小时，它会作为不可变的排序字符串（<code>SSTable</code>）刷新到磁盘。<br><code>SSTable</code> 中的数据按 key 值进行排序，这些写都是顺序 IO，所以在任何存储介质上都很快。<br><img src="/img/database/memtable-to-sstable.gif" alt="Memtable to SSTable"></p><p>新的 <code>SSTable</code> 成为 LSM 数的最新段，随着越来越多的数据写入，会创建越来越多的不可变 <code>SSTable</code> 被添加到 LSM 树中。<br><img src="/img/database/sstable-1.gif" alt="SSTable"></p><h3 id="LSM-Tree-更新数据"><a href="#LSM-Tree-更新数据" class="headerlink" title="LSM Tree 更新数据"></a>LSM Tree 更新数据</h3><p>由于 <code>SSTable</code> 是不可变的，对已存在的数据更新时，不会覆盖原有的 <code>SSTable</code>，新的数据会添加到最新的 <code>SSTable</code> 中，该条数据会取代旧 SSTable 中的数据。<br><img src="/img/database/sstable-update.gif" alt="SSTable Update"></p><h3 id="LSM-Tree-删除数据"><a href="#LSM-Tree-删除数据" class="headerlink" title="LSM Tree 删除数据"></a>LSM Tree 删除数据</h3><p>删除数据也要做特殊处理，因为我们没有办法将 SSTable 中任何内容标记为已删除。为了执行删除，它会向对象键的最新 <code>SSTable</code> 添加一个名为逻辑删除的标记。当我们读取遇到逻辑删除时，我们就知道该对象已经被删除，所以这会占用额外的空间。<br><img src="/img/database/sstable-delete.gif" alt="SSTable Delete"></p><h3 id="LSM-Tree-读流程"><a href="#LSM-Tree-读流程" class="headerlink" title="LSM Tree 读流程"></a>LSM Tree 读流程</h3><p>在进行读请求时，首先会尝试在 <code>Memtable</code> 中查找数据，然后在最新的 <code>SSTable</code> 中查找，然后在下一个 <code>SSTable</code> 中查找，依此类推。由于 <code>SSTable</code> 已经排序了，因此可以高效地完成查找。<br><img src="/img/database/sstable-search.gif" alt="SSTable Search"></p><p>越来越多的 <code>SSTable</code> 带来了两个问题，随着 <code>SSTable</code> 数量的增加，查找数据所需的时间也会越来越长，随着数据更新和逻辑删除的添加，过时的条目会越来越多，这些占用了磁盘空间。<br><img src="/img/database/sstable-outdated.gif" alt="SSTable Outdated"></p><h2 id="2-LSM-Tree-合并与压缩"><a href="#2-LSM-Tree-合并与压缩" class="headerlink" title="2 LSM Tree 合并与压缩"></a>2 LSM Tree 合并与压缩</h2><p>为了解决这些问题，会在后台定期进行合并和压缩。合并 <code>SSTable</code> 并丢弃过时或已经删除的值，回收了磁盘空间并减少了读取时查看的 <code>SSTable</code> 的数据量，由于 <code>SSTable</code> 已排序，因此合并和压缩的过程简单且高效，该方法类似于<strong>合并排序算法的合并阶段</strong>中使用的方法。<br><img src="/img/database/sstable-compaction.gif" alt="SSTable Compaction"></p><p><img src="/img/database/sstable-merge.gif" alt="SSTable Merge"></p><p>这就是 LSM 树提供快速写入的方法。</p><p>回顾整个过程：数据首先会写入内存的 <code>Memtable</code> 中，当缓冲区填满时，我们将其排序并将其作为不可变的 <code>SSTable</code> 刷新到磁盘中。</p><p>随着更多缓冲区的数据刷新到磁盘，<code>SSTable</code> 的数量也会增加，这会给读取数据带来较大的负担， 因为每次读取都必须搜索这些 <code>SSTable</code>。</p><p>为了限制每次读取时必须搜索的 <code>SSTable</code> 数量，LSM 树会合并 <code>SSTable</code> 并在后台压缩他们。合并 <code>SSTable</code> 之后，它们会被组织为多个级别，这就是 LSM 树的树的部分。<br><img src="/img/database/sstable-level.gif" alt="SSTable Level"></p><p>合并和压缩 <code>SSTable</code> 也有不同的策略。通常有两种策略：<code>Size Level Compaction</code> 和 <code>Level Compaction</code>。<code>Size Level Compaction</code> 针对写入吞吐量进行了优化。<code>Level Compaction</code> 针对读取做了更多优化。<br><img src="/img/database/sstable-merge-strategy.gif" alt="SSTable Merge Strategy"></p><h2 id="3-LSM-Tree-优化策略"><a href="#3-LSM-Tree-优化策略" class="headerlink" title="3 LSM Tree 优化策略"></a>3 LSM Tree 优化策略</h2><p>压缩使 <code>SSTable</code> 的数量更易于管理；<code>SSTable</code> 被组织成多个级别，随着上一级的 <code>SSTable</code> 合并到当前层级，每个级别都会呈指数级别增长。压缩会消耗大量 I&#x2F;O，</p><p>常见的优化策略：</p><h3 id="汇总表"><a href="#汇总表" class="headerlink" title="汇总表"></a>汇总表</h3><p>为了查找数据，会对每个级别的 <code>SSTable</code> 进行搜索，尽管对排序数据的搜索速度很快，但是遍历所有磁盘上的 <code>SSTable</code> 会消耗大量 IO，许多系统会在内存中保存一个汇总表，其中包含每个级别的每个磁盘的最大最小的范围，这样就可以过滤掉不需要遍历的 <code>SSTable</code> ，节省了大量的随机 IO。<br><img src="/img/database/summary-table.gif" alt="Summary Table"></p><h3 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h3><p>另一个代价比较高的问题，是查找不存在的秘钥，这需要查找所有级别中符合条件的块，大多数系统在每个级别都有一个布隆过滤器。</p><p>布隆过滤器是一种节省空间的数据结构，它的逻辑是：如果键不存在，则返回一定不存在，如果键可能存在，则返回可能存在；</p><p>如果某个级别不存在该 key，则可以通过布隆过滤器快速跳过该级别，从而大大减少所需的随机 I&#x2F;O 数量。<br><img src="/img/database/bloom-filters.gif" alt="Bloom Filters"></p><p>总之，由 LSM 树支持的 NoSQL 数据库可以进行调整来支持非常高的写入速率，与任何数据库一样，正确的调整是关键，对于 LSM 树，压缩调整是关键。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>Database</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Database</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>Apache Paimon -- 文件操作</title>
     <link href="/2023/10/18/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/"/>
     <url>/2023/10/18/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/</url>
@@ -204,6 +229,31 @@
   
   
   <entry>
+    <title>HBase -- 读取数据的几种方式</title>
+    <link href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/"/>
+    <url>/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/</url>
+    
+    <content type="html"><![CDATA[<h2 id="1-GET"><a href="#1-GET" class="headerlink" title="1 GET"></a>1 GET</h2><p>通过 RowKey 进行精确查找。</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">get &#x27;FILE_INFO_MAP1&#x27;, &#x27;W_USFTUS20230255932A1US20230255932A1-20230817-C00001.CDX&#x27;<br></code></pre></td></tr></table></figure><p><img src="/img/bigDataComponents/hbase/hbase-8.png"></p><h2 id="2-Scan"><a href="#2-Scan" class="headerlink" title="2 Scan"></a>2 Scan</h2><p>用于顺序扫描整个表或特定范围的行。</p><h3 id="扫描整表"><a href="#扫描整表" class="headerlink" title="扫描整表"></a>扫描整表</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">scan &#x27;FILE_INFO_MAP1&#x27;<br></code></pre></td></tr></table></figure><h3 id="特定范围的行"><a href="#特定范围的行" class="headerlink" title="特定范围的行"></a>特定范围的行</h3><p>范围为 [STARTROW, STOPROW)。</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">scan &#x27;FILE_INFO_MAP1&#x27;, &#123; STARTROW =&gt; &#x27;W_RUDRRU2021135644A300000002.GIF&#x27;, STOPROW =&gt; &#x27;W_RUDRRU2021135644A300000004.GIF&#x27; &#125;<br></code></pre></td></tr></table></figure><p><img src="/img/bigDataComponents/hbase/hbase-9.png"></p><h2 id="3-Filter"><a href="#3-Filter" class="headerlink" title="3 Filter"></a>3 Filter</h2><p>Hbase 提供了种类丰富的过滤器（filter）来提高数据处理的效率，用户可以通过内置或自定义的过滤器来对数据进行过滤，所有的过滤器都在服务端生效，即谓词下推（predicate push down）。这样可以保证过滤掉的数据不会被传送到客户端，从而减轻网络传输和客户端处理的压力。<br><img src="/img/bigDataComponents/hbase/hbase-filter.png"></p><h3 id="列簇与列过滤器"><a href="#列簇与列过滤器" class="headerlink" title="列簇与列过滤器"></a>列簇与列过滤器</h3><ul><li><p>FamilyFilter:针对列族进行比较和过滤 </p><ul><li><code>scan &#39;test&#39;,FILTER=&gt;&quot;FamilyFilter(=,&#39;substring:liecu&#39;)&quot;</code></li><li>说明：查询列簇前缀以“liecu”开头的数据</li></ul></li><li><p>QualifierFilter:列标识过滤器</p></li></ul><p>scan ‘test’,FILTER&#x3D;&gt;”QualifierFilter(&#x3D;,’substring:name’)”</p><p>说明：查询所有列簇中列名是name的列数据</p><p>ColumnPrefixFilter:对列名前缀进行过滤</p><p>scan ‘test’,FILTER&#x3D;&gt;”ColumnPrefixFilter(‘n’)”</p><p>说明：查询所有列簇中列以“n”开头的数据</p><p>MultipleColumnPrefixFilter:可以指定多个前缀</p><p>scan ‘test’,FILTER&#x3D;&gt;”MultipleColumnPrefixFilter(‘n’,’m’)”</p><p>说明：查询test表，所有列簇中列名以“n“或者”m”开头的数据</p><p>ColumnRangeFilter:设置范围按字典序对列名进行过滤</p><p>scan ‘test’,FILTER&#x3D;&gt;”ColumnRangeFilter(‘name’,true,’music’,false)”</p><p>说明：ColumnRangeFilter过滤器则可以扫描出符合过滤条件的列范围，起始和终止列名用单引号引用，true 和 false 参数可指明结果中包含的起始或终止列。</p><p>值过滤器<br>ValueFilter：值过滤器，找到符合值条件的键值对</p><p>模糊查找：scan ‘test’, FILTER &#x3D;&gt; “ValueFilter(&#x3D;,’substring:张’)”</p><p>说明：查询test表中，所有列值为以“张”开头的数据</p><p>精确查询：scan ‘test’, FILTER &#x3D;&gt; “ValueFilter(&#x3D;,’binary:张三’)”</p><p>说明：查询test表中，所有列值为“张三”的数据</p><p>注意1：ValueFilter 过滤器可以利用 get 和 scan 方法对单元格进行过滤，但是使用 get 方法时，需要指定行键</p><p>SingleColumnValueFilter：在指定的列族和列中进行比较的值过滤器</p><p>scan ‘test’, {FILTER &#x3D;&gt; “SingleColumnValueFilter(‘liecuA’, ‘name’, &#x3D;, ‘substring:张’)”,FORMATTER &#x3D;&gt; ‘toString’}</p><p>说明：查询test表，列簇：liecuA 下 name列以“张”开头的数据</p><p>注意：如果查询的数据存在没有liecuA：name 对应值得数据也会展示出啦</p><p>解决方案：HBase入门：shell模糊查询_u011236069的博客-CSDN博客   注意事项2</p><p>SingleColumnValueExcludeFilter：排除匹配成功的值</p><p>scan ‘test’, {FILTER &#x3D;&gt; “SingleColumnValueExcludeFilter(‘liecuA’, ‘name’, &#x3D;, ‘substring:张’)”,FORMATTER &#x3D;&gt; ‘toString’}</p><p>其他过滤器<br>还有一些其他的过滤器，比如与分页，时间等</p><p>ColumnCountGetFilter：限制每个逻辑行返回键值对的个数，在 get 方法中使用</p><p>get ‘test’, ‘row1’, FILTER &#x3D;&gt; “ColumnCountGetFilter(3)”</p><p>说明：查询test表行键为“row1”的数据，只允许显示3列</p><p>TimestampsFilter：时间戳过滤，支持等值，可以设置多个时间戳</p><p>scan ‘test’, Filter &#x3D;&gt; “TimestampsFilter(1636561062,1636993106)”</p><p>说明：</p><p>注意Filter需要再使用前进行导入</p><p>PageFilter：对查询结果按行进行分页显示</p><p>scan ‘test’, { STARTROW &#x3D;&gt; ‘row1’, ENDROW &#x3D;&gt; ‘row5’, FILTER &#x3D;&gt; “PageFilter(3)” }</p><p>说明：查询test表根据行键从“row1”到“row5” 查询3行数据</p><p>ColumnPaginationFilter：对一行的所有列分页，只返回 [offset,offset+limit] 范围内的列</p><p>scan ‘test’, { STARTROW &#x3D;&gt; ‘row1’, ENDROW &#x3D;&gt; ‘row5’, FILTER &#x3D;&gt; “ColumnPaginationFilter(2,1)” }</p><p>注：ColumnPaginationFilter过滤器对一个逻辑行的所有列进行分页显示。</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>HBase</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>HBase</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>JAVA 基础 -- CompletableFuture + 自定义线程池 实现多线程并发</title>
     <link href="/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/"/>
     <url>/2023/10/07/java/JAVA%20%E5%9F%BA%E7%A1%80%20--%20CompletableFuture%20+%20%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BA%BF%E7%A8%8B%E6%B1%A0%20%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%B9%B6%E5%8F%91/</url>
@@ -271,31 +321,6 @@
     <tags>
       
       <tag>Flink</tag>
-      
-    </tags>
-    
-  </entry>
-  
-  
-  
-  <entry>
-    <title>LSM Tree -- NoSQL 数据库背后的秘密</title>
-    <link href="/2023/09/27/database/LSM%20Tree%20--%20NoSQL%20%E6%95%B0%E6%8D%AE%E5%BA%93%E8%83%8C%E5%90%8E%E7%9A%84%E7%A7%98%E5%AF%86/"/>
-    <url>/2023/09/27/database/LSM%20Tree%20--%20NoSQL%20%E6%95%B0%E6%8D%AE%E5%BA%93%E8%83%8C%E5%90%8E%E7%9A%84%E7%A7%98%E5%AF%86/</url>
-    
-    <content type="html"><![CDATA[<h2 id="1-LSM-Tree-读写流程与架构"><a href="#1-LSM-Tree-读写流程与架构" class="headerlink" title="1 LSM Tree 读写流程与架构"></a>1 LSM Tree 读写流程与架构</h2><p>许多 NoSQL 数据库背后的秘密武器，是一种称为 <code>LSM （Log structured merge tree）</code>的数据结构。LSM 树针对快速写入进行了优化。要了解 LSM 的工作原理，我们先看一下关系型数据库通常是如何存储数据的。<br><img src="/img/database/LSM.gif" alt="LSM"></p><p>关系型数据库中通常由称为 B 树的数据结构支持，B 树针对读进行了优化，更新 B 数的代价相对更高，因为它涉及随机 IO，并且可能更新磁盘上的多个页面，这限制了 B 树读取数据的速度。<br><img src="/img/database/b+tree.gif" alt="b+tree"></p><h3 id="LSM-Tree-写流程"><a href="#LSM-Tree-写流程" class="headerlink" title="LSM Tree 写流程"></a>LSM Tree 写流程</h3><p>LSM 树的工作原理不同，当数据写入时，先会到达称为 <code>Memtable</code> 的数据结构，在内存中进行批量处理，<code>Memtable</code> 按照 key 排序，<code>Memtable</code> 通常以平衡二叉树实现，当 <code>Memtable</code> 达到一定大小时，它会作为不可变的排序字符串（<code>SSTable</code>）刷新到磁盘。<br><code>SSTable</code> 中的数据按 key 值进行排序，这些写都是顺序 IO，所以在任何存储介质上都很快。<br><img src="/img/database/memtable-to-sstable.gif" alt="Memtable to SSTable"></p><p>新的 <code>SSTable</code> 成为 LSM 数的最新段，随着越来越多的数据写入，会创建越来越多的不可变 <code>SSTable</code> 被添加到 LSM 树中。<br><img src="/img/database/sstable-1.gif" alt="SSTable"></p><h3 id="LSM-Tree-更新数据"><a href="#LSM-Tree-更新数据" class="headerlink" title="LSM Tree 更新数据"></a>LSM Tree 更新数据</h3><p>由于 <code>SSTable</code> 是不可变的，对已存在的数据更新时，不会覆盖原有的 <code>SSTable</code>，新的数据会添加到最新的 <code>SSTable</code> 中，该条数据会取代旧 SSTable 中的数据。<br><img src="/img/database/sstable-update.gif" alt="SSTable Update"></p><h3 id="LSM-Tree-删除数据"><a href="#LSM-Tree-删除数据" class="headerlink" title="LSM Tree 删除数据"></a>LSM Tree 删除数据</h3><p>删除数据也要做特殊处理，因为我们没有办法将 SSTable 中任何内容标记为已删除。为了执行删除，它会向对象键的最新 <code>SSTable</code> 添加一个名为逻辑删除的标记。当我们读取遇到逻辑删除时，我们就知道该对象已经被删除，所以这会占用额外的空间。<br><img src="/img/database/sstable-delete.gif" alt="SSTable Delete"></p><h3 id="LSM-Tree-读流程"><a href="#LSM-Tree-读流程" class="headerlink" title="LSM Tree 读流程"></a>LSM Tree 读流程</h3><p>在进行读请求时，首先会尝试在 <code>Memtable</code> 中查找数据，然后在最新的 <code>SSTable</code> 中查找，然后在下一个 <code>SSTable</code> 中查找，依此类推。由于 <code>SSTable</code> 已经排序了，因此可以高效地完成查找。<br><img src="/img/database/sstable-search.gif" alt="SSTable Search"></p><p>越来越多的 <code>SSTable</code> 带来了两个问题，随着 <code>SSTable</code> 数量的增加，查找数据所需的时间也会越来越长，随着数据更新和逻辑删除的添加，过时的条目会越来越多，这些占用了磁盘空间。<br><img src="/img/database/sstable-outdated.gif" alt="SSTable Outdated"></p><h2 id="2-LSM-Tree-合并与压缩"><a href="#2-LSM-Tree-合并与压缩" class="headerlink" title="2 LSM Tree 合并与压缩"></a>2 LSM Tree 合并与压缩</h2><p>为了解决这些问题，会在后台定期进行合并和压缩。合并 <code>SSTable</code> 并丢弃过时或已经删除的值，回收了磁盘空间并减少了读取时查看的 <code>SSTable</code> 的数据量，由于 <code>SSTable</code> 已排序，因此合并和压缩的过程简单且高效，该方法类似于<strong>合并排序算法的合并阶段</strong>中使用的方法。<br><img src="/img/database/sstable-compaction.gif" alt="SSTable Compaction"></p><p><img src="/img/database/sstable-merge.gif" alt="SSTable Merge"></p><p>这就是 LSM 树提供快速写入的方法。</p><p>回顾整个过程：数据首先会写入内存的 <code>Memtable</code> 中，当缓冲区填满时，我们将其排序并将其作为不可变的 <code>SSTable</code> 刷新到磁盘中。</p><p>随着更多缓冲区的数据刷新到磁盘，<code>SSTable</code> 的数量也会增加，这会给读取数据带来较大的负担， 因为每次读取都必须搜索这些 <code>SSTable</code>。</p><p>为了限制每次读取时必须搜索的 <code>SSTable</code> 数量，LSM 树会合并 <code>SSTable</code> 并在后台压缩他们。合并 <code>SSTable</code> 之后，它们会被组织为多个级别，这就是 LSM 树的树的部分。<br><img src="/img/database/sstable-level.gif" alt="SSTable Level"></p><p>合并和压缩 <code>SSTable</code> 也有不同的策略。通常有两种策略：<code>Size Level Compaction</code> 和 <code>Level Compaction</code>。<code>Size Level Compaction</code> 针对写入吞吐量进行了优化。<code>Level Compaction</code> 针对读取做了更多优化。<br><img src="/img/database/sstable-merge-strategy.gif" alt="SSTable Merge Strategy"></p><h2 id="3-LSM-Tree-优化策略"><a href="#3-LSM-Tree-优化策略" class="headerlink" title="3 LSM Tree 优化策略"></a>3 LSM Tree 优化策略</h2><p>压缩使 <code>SSTable</code> 的数量更易于管理；<code>SSTable</code> 被组织成多个级别，随着上一级的 <code>SSTable</code> 合并到当前层级，每个级别都会呈指数级别增长。压缩会消耗大量 I&#x2F;O，</p><p>常见的优化策略：</p><h3 id="汇总表"><a href="#汇总表" class="headerlink" title="汇总表"></a>汇总表</h3><p>为了查找数据，会对每个级别的 <code>SSTable</code> 进行搜索，尽管对排序数据的搜索速度很快，但是遍历所有磁盘上的 <code>SSTable</code> 会消耗大量 IO，许多系统会在内存中保存一个汇总表，其中包含每个级别的每个磁盘的最大最小的范围，这样就可以过滤掉不需要遍历的 <code>SSTable</code> ，节省了大量的随机 IO。<br><img src="/img/database/summary-table.gif" alt="Summary Table"></p><h3 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h3><p>另一个代价比较高的问题，是查找不存在的秘钥，这需要查找所有级别中符合条件的块，大多数系统在每个级别都有一个布隆过滤器。</p><p>布隆过滤器是一种节省空间的数据结构，它的逻辑是：如果键不存在，则返回一定不存在，如果键可能存在，则返回可能存在；</p><p>如果某个级别不存在该 key，则可以通过布隆过滤器快速跳过该级别，从而大大减少所需的随机 I&#x2F;O 数量。<br><img src="/img/database/bloom-filters.gif" alt="Bloom Filters"></p><p>总之，由 LSM 树支持的 NoSQL 数据库可以进行调整来支持非常高的写入速率，与任何数据库一样，正确的调整是关键，对于 LSM 树，压缩调整是关键。</p>]]></content>
-    
-    
-    <categories>
-      
-      <category>Database</category>
-      
-    </categories>
-    
-    
-    <tags>
-      
-      <tag>Database</tag>
       
     </tags>
     

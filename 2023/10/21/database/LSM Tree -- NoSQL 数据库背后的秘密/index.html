@@ -16,26 +16,39 @@
   <meta name="author" content="Liu Jun">
   <meta name="keywords" content="">
   
-    <meta name="description" content="2011 年初，LinkedIn 开源了 Kafka，这是一个分布式事件流平台。它以作家弗朗茨-卡夫卡（Franz Kafka）的名字命名。顾名思义，Kafka 是为写而优化的。它为处理实时数据馈送提供了一个高吞吐量、低延迟的平台，在互联网公司中得到广泛应用。 有许多设计决策对 Kafka 的性能做出了贡献。在这篇文章中，我们将重点关注两个。我们认为这两者最有分量。   Kafka 依赖于顺序 I">
+    <meta name="description" content="1 LSM Tree 读写流程与架构许多 NoSQL 数据库背后的秘密武器，是一种称为 LSM （Log structured merge tree）的数据结构。LSM 树针对快速写入进行了优化。要了解 LSM 的工作原理，我们先看一下关系型数据库通常是如何存储数据的。 关系型数据库中通常由称为 B 树的数据结构支持，B 树针对读进行了优化，更新 B 数的代价相对更高，因为它涉及随机 IO，并且可">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Kafka -- 为什么 Kafka 很快？">
-<meta property="og:url" content="http://example.com/2023/10/09/bigDataComponents/kafka/Kafka%20--%20%E4%B8%BA%E4%BB%80%E4%B9%88%20Kafka%20%E5%BE%88%E5%BF%AB%EF%BC%9F/index.html">
+<meta property="og:title" content="LSM Tree -- NoSQL 数据库背后的秘密">
+<meta property="og:url" content="http://example.com/2023/10/21/database/LSM%20Tree%20--%20NoSQL%20%E6%95%B0%E6%8D%AE%E5%BA%93%E8%83%8C%E5%90%8E%E7%9A%84%E7%A7%98%E5%AF%86/index.html">
 <meta property="og:site_name" content="ACMAN">
-<meta property="og:description" content="2011 年初，LinkedIn 开源了 Kafka，这是一个分布式事件流平台。它以作家弗朗茨-卡夫卡（Franz Kafka）的名字命名。顾名思义，Kafka 是为写而优化的。它为处理实时数据馈送提供了一个高吞吐量、低延迟的平台，在互联网公司中得到广泛应用。 有许多设计决策对 Kafka 的性能做出了贡献。在这篇文章中，我们将重点关注两个。我们认为这两者最有分量。   Kafka 依赖于顺序 I">
+<meta property="og:description" content="1 LSM Tree 读写流程与架构许多 NoSQL 数据库背后的秘密武器，是一种称为 LSM （Log structured merge tree）的数据结构。LSM 树针对快速写入进行了优化。要了解 LSM 的工作原理，我们先看一下关系型数据库通常是如何存储数据的。 关系型数据库中通常由称为 B 树的数据结构支持，B 树针对读进行了优化，更新 B 数的代价相对更高，因为它涉及随机 IO，并且可">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/img/bigDataComponents/kafka/why_is_kafka_fast.jpeg">
-<meta property="article:published_time" content="2023-10-09T05:14:12.000Z">
-<meta property="article:modified_time" content="2023-10-19T12:39:18.145Z">
+<meta property="og:image" content="http://example.com/img/database/LSM.gif">
+<meta property="og:image" content="http://example.com/img/database/b+tree.gif">
+<meta property="og:image" content="http://example.com/img/database/memtable-to-sstable.gif">
+<meta property="og:image" content="http://example.com/img/database/sstable-1.gif">
+<meta property="og:image" content="http://example.com/img/database/sstable-update.gif">
+<meta property="og:image" content="http://example.com/img/database/sstable-delete.gif">
+<meta property="og:image" content="http://example.com/img/database/sstable-search.gif">
+<meta property="og:image" content="http://example.com/img/database/sstable-outdated.gif">
+<meta property="og:image" content="http://example.com/img/database/sstable-compaction.gif">
+<meta property="og:image" content="http://example.com/img/database/sstable-merge.gif">
+<meta property="og:image" content="http://example.com/img/database/sstable-level.gif">
+<meta property="og:image" content="http://example.com/img/database/sstable-merge-strategy.gif">
+<meta property="og:image" content="http://example.com/img/database/summary-table.gif">
+<meta property="og:image" content="http://example.com/img/database/bloom-filters.gif">
+<meta property="article:published_time" content="2023-10-21T05:14:12.000Z">
+<meta property="article:modified_time" content="2023-10-21T07:13:31.127Z">
 <meta property="article:author" content="Liu Jun">
-<meta property="article:tag" content="Kafka">
+<meta property="article:tag" content="Database">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://example.com/img/bigDataComponents/kafka/why_is_kafka_fast.jpeg">
+<meta name="twitter:image" content="http://example.com/img/database/LSM.gif">
   
   
     <meta name="referrer" content="no-referrer-when-downgrade">
   
   
-  <title>Kafka -- 为什么 Kafka 很快？ - ACMAN</title>
+  <title>LSM Tree -- NoSQL 数据库背后的秘密 - ACMAN</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -201,7 +214,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Kafka -- 为什么 Kafka 很快？"></span>
+            <span id="subtitle" data-typed-text="LSM Tree -- NoSQL 数据库背后的秘密"></span>
           
         </div>
 
@@ -212,8 +225,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2023-10-09 13:14" pubdate>
-          2023年10月9日 下午
+        <time datetime="2023-10-21 13:14" pubdate>
+          2023年10月21日 下午
         </time>
       </span>
     
@@ -224,7 +237,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          505 字
+          1.8k 字
         
       </span>
     
@@ -235,7 +248,7 @@
         
         
         
-          5 分钟
+          16 分钟
         
       </span>
     
@@ -280,40 +293,33 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">Kafka -- 为什么 Kafka 很快？</h1>
+            <h1 id="seo-header">LSM Tree -- NoSQL 数据库背后的秘密</h1>
             
             
               <div class="markdown-body">
                 
-                <p>2011 年初，LinkedIn 开源了 Kafka，这是一个分布式事件流平台。它以作家弗朗茨-卡夫卡（Franz Kafka）的名字命名。顾名思义，Kafka 是为写而优化的。它为处理实时数据馈送提供了一个高吞吐量、低延迟的平台，在互联网公司中得到广泛应用。</p>
-<p>有许多设计决策对 Kafka 的性能做出了贡献。在这篇文章中，我们将重点关注两个。我们认为这两者最有分量。</p>
-<p><img src="/img/bigDataComponents/kafka/why_is_kafka_fast.jpeg" srcset="/img/loading.gif" lazyload></p>
-<ol>
-<li><strong>Kafka 依赖于顺序 I&#x2F;O；</strong></li>
-<li><strong>零拷贝机制。</strong></li>
-</ol>
-<p>该图说明了数据如何在生产者和消费者之间传输，以及零拷贝的含义。</p>
-<ul>
-<li><p>Step 1.1 - 1.3：生产者将数据写入磁盘；</p>
-</li>
-<li><p>Step 2: 消费者读取数据，不使用零拷贝技术 </p>
-<ul>
-<li>2.1: 数据从磁盘加载到操作系统缓存</li>
-<li>2.2 数据从操作系统缓存复制到 Kafka进程</li>
-<li>2.3 Kafka进程将数据复制到套接字缓冲区 (Socket Buffer)</li>
-<li>2.4 数据从套接字缓冲区复制到网卡</li>
-<li>2.5 网卡向用户发送数据</li>
-</ul>
-</li>
-<li><p>Step 3：消费者使用零拷贝技术读取数据 </p>
-<ul>
-<li>3.1: 数据从磁盘加载到操作系统缓存</li>
-<li>3.2 操作系统缓存通过 sendfile() 命令直接将数据复制到网卡</li>
-<li>3.3 网卡向用户发送数据</li>
-</ul>
-</li>
-</ul>
-<p>零拷贝节省了应用程序和内核上下文之间多次数据拷贝。 这种方法可将时间缩短约 65% 。</p>
+                <h2 id="1-LSM-Tree-读写流程与架构"><a href="#1-LSM-Tree-读写流程与架构" class="headerlink" title="1 LSM Tree 读写流程与架构"></a>1 LSM Tree 读写流程与架构</h2><p>许多 NoSQL 数据库背后的秘密武器，是一种称为 <code>LSM （Log structured merge tree）</code>的数据结构。LSM 树针对快速写入进行了优化。要了解 LSM 的工作原理，我们先看一下关系型数据库通常是如何存储数据的。<br><img src="/img/database/LSM.gif" srcset="/img/loading.gif" lazyload alt="LSM"></p>
+<p>关系型数据库中通常由称为 B 树的数据结构支持，B 树针对读进行了优化，更新 B 数的代价相对更高，因为它涉及随机 IO，并且可能更新磁盘上的多个页面，这限制了 B 树读取数据的速度。<br><img src="/img/database/b+tree.gif" srcset="/img/loading.gif" lazyload alt="b+tree"></p>
+<h3 id="LSM-Tree-写流程"><a href="#LSM-Tree-写流程" class="headerlink" title="LSM Tree 写流程"></a>LSM Tree 写流程</h3><p>LSM 树的工作原理不同，当数据写入时，先会到达称为 <code>Memtable</code> 的数据结构，在内存中进行批量处理，<code>Memtable</code> 按照 key 排序，<code>Memtable</code> 通常以平衡二叉树实现，当 <code>Memtable</code> 达到一定大小时，它会作为不可变的排序字符串（<code>SSTable</code>）刷新到磁盘。<br><code>SSTable</code> 中的数据按 key 值进行排序，这些写都是顺序 IO，所以在任何存储介质上都很快。<br><img src="/img/database/memtable-to-sstable.gif" srcset="/img/loading.gif" lazyload alt="Memtable to SSTable"></p>
+<p>新的 <code>SSTable</code> 成为 LSM 数的最新段，随着越来越多的数据写入，会创建越来越多的不可变 <code>SSTable</code> 被添加到 LSM 树中。<br><img src="/img/database/sstable-1.gif" srcset="/img/loading.gif" lazyload alt="SSTable"></p>
+<h3 id="LSM-Tree-更新数据"><a href="#LSM-Tree-更新数据" class="headerlink" title="LSM Tree 更新数据"></a>LSM Tree 更新数据</h3><p>由于 <code>SSTable</code> 是不可变的，对已存在的数据更新时，不会覆盖原有的 <code>SSTable</code>，新的数据会添加到最新的 <code>SSTable</code> 中，该条数据会取代旧 SSTable 中的数据。<br><img src="/img/database/sstable-update.gif" srcset="/img/loading.gif" lazyload alt="SSTable Update"></p>
+<h3 id="LSM-Tree-删除数据"><a href="#LSM-Tree-删除数据" class="headerlink" title="LSM Tree 删除数据"></a>LSM Tree 删除数据</h3><p>删除数据也要做特殊处理，因为我们没有办法将 SSTable 中任何内容标记为已删除。为了执行删除，它会向对象键的最新 <code>SSTable</code> 添加一个名为逻辑删除的标记。当我们读取遇到逻辑删除时，我们就知道该对象已经被删除，所以这会占用额外的空间。<br><img src="/img/database/sstable-delete.gif" srcset="/img/loading.gif" lazyload alt="SSTable Delete"></p>
+<h3 id="LSM-Tree-读流程"><a href="#LSM-Tree-读流程" class="headerlink" title="LSM Tree 读流程"></a>LSM Tree 读流程</h3><p>在进行读请求时，首先会尝试在 <code>Memtable</code> 中查找数据，然后在最新的 <code>SSTable</code> 中查找，然后在下一个 <code>SSTable</code> 中查找，依此类推。由于 <code>SSTable</code> 已经排序了，因此可以高效地完成查找。<br><img src="/img/database/sstable-search.gif" srcset="/img/loading.gif" lazyload alt="SSTable Search"></p>
+<p>越来越多的 <code>SSTable</code> 带来了两个问题，随着 <code>SSTable</code> 数量的增加，查找数据所需的时间也会越来越长，随着数据更新和逻辑删除的添加，过时的条目会越来越多，这些占用了磁盘空间。<br><img src="/img/database/sstable-outdated.gif" srcset="/img/loading.gif" lazyload alt="SSTable Outdated"></p>
+<h2 id="2-LSM-Tree-合并与压缩"><a href="#2-LSM-Tree-合并与压缩" class="headerlink" title="2 LSM Tree 合并与压缩"></a>2 LSM Tree 合并与压缩</h2><p>为了解决这些问题，会在后台定期进行合并和压缩。合并 <code>SSTable</code> 并丢弃过时或已经删除的值，回收了磁盘空间并减少了读取时查看的 <code>SSTable</code> 的数据量，由于 <code>SSTable</code> 已排序，因此合并和压缩的过程简单且高效，该方法类似于<strong>合并排序算法的合并阶段</strong>中使用的方法。<br><img src="/img/database/sstable-compaction.gif" srcset="/img/loading.gif" lazyload alt="SSTable Compaction"></p>
+<p><img src="/img/database/sstable-merge.gif" srcset="/img/loading.gif" lazyload alt="SSTable Merge"></p>
+<p>这就是 LSM 树提供快速写入的方法。</p>
+<p>回顾整个过程：数据首先会写入内存的 <code>Memtable</code> 中，当缓冲区填满时，我们将其排序并将其作为不可变的 <code>SSTable</code> 刷新到磁盘中。</p>
+<p>随着更多缓冲区的数据刷新到磁盘，<code>SSTable</code> 的数量也会增加，这会给读取数据带来较大的负担， 因为每次读取都必须搜索这些 <code>SSTable</code>。</p>
+<p>为了限制每次读取时必须搜索的 <code>SSTable</code> 数量，LSM 树会合并 <code>SSTable</code> 并在后台压缩他们。合并 <code>SSTable</code> 之后，它们会被组织为多个级别，这就是 LSM 树的树的部分。<br><img src="/img/database/sstable-level.gif" srcset="/img/loading.gif" lazyload alt="SSTable Level"></p>
+<p>合并和压缩 <code>SSTable</code> 也有不同的策略。通常有两种策略：<code>Size Level Compaction</code> 和 <code>Level Compaction</code>。<code>Size Level Compaction</code> 针对写入吞吐量进行了优化。<code>Level Compaction</code> 针对读取做了更多优化。<br><img src="/img/database/sstable-merge-strategy.gif" srcset="/img/loading.gif" lazyload alt="SSTable Merge Strategy"></p>
+<h2 id="3-LSM-Tree-优化策略"><a href="#3-LSM-Tree-优化策略" class="headerlink" title="3 LSM Tree 优化策略"></a>3 LSM Tree 优化策略</h2><p>压缩使 <code>SSTable</code> 的数量更易于管理；<code>SSTable</code> 被组织成多个级别，随着上一级的 <code>SSTable</code> 合并到当前层级，每个级别都会呈指数级别增长。压缩会消耗大量 I&#x2F;O，</p>
+<p>常见的优化策略：</p>
+<h3 id="汇总表"><a href="#汇总表" class="headerlink" title="汇总表"></a>汇总表</h3><p>为了查找数据，会对每个级别的 <code>SSTable</code> 进行搜索，尽管对排序数据的搜索速度很快，但是遍历所有磁盘上的 <code>SSTable</code> 会消耗大量 IO，许多系统会在内存中保存一个汇总表，其中包含每个级别的每个磁盘的最大最小的范围，这样就可以过滤掉不需要遍历的 <code>SSTable</code> ，节省了大量的随机 IO。<br><img src="/img/database/summary-table.gif" srcset="/img/loading.gif" lazyload alt="Summary Table"></p>
+<h3 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h3><p>另一个代价比较高的问题，是查找不存在的秘钥，这需要查找所有级别中符合条件的块，大多数系统在每个级别都有一个布隆过滤器。</p>
+<p>布隆过滤器是一种节省空间的数据结构，它的逻辑是：如果键不存在，则返回一定不存在，如果键可能存在，则返回可能存在；</p>
+<p>如果某个级别不存在该 key，则可以通过布隆过滤器快速跳过该级别，从而大大减少所需的随机 I&#x2F;O 数量。<br><img src="/img/database/bloom-filters.gif" srcset="/img/loading.gif" lazyload alt="Bloom Filters"></p>
+<p>总之，由 LSM 树支持的 NoSQL 数据库可以进行调整来支持非常高的写入速率，与任何数据库一样，正确的调整是关键，对于 LSM 树，压缩调整是关键。</p>
 
                 
               </div>
@@ -332,7 +338,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Kafka/" class="category-chain-item">Kafka</a>
+  <a href="/categories/Database/" class="category-chain-item">Database</a>
   
   
 
@@ -347,7 +353,7 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/Kafka/" class="print-no-link">#Kafka</a>
+        <a href="/tags/Database/" class="print-no-link">#Database</a>
       
     </div>
   
@@ -359,8 +365,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Kafka -- 为什么 Kafka 很快？</div>
-      <div>http://example.com/2023/10/09/bigDataComponents/kafka/Kafka -- 为什么 Kafka 很快？/</div>
+      <div>LSM Tree -- NoSQL 数据库背后的秘密</div>
+      <div>http://example.com/2023/10/21/database/LSM Tree -- NoSQL 数据库背后的秘密/</div>
     </div>
     <div class="license-meta">
       
@@ -372,7 +378,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2023年10月9日</div>
+          <div>2023年10月21日</div>
         </div>
       
       
@@ -404,18 +410,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Hbase -- 数据模型">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Hbase -- 数据模型</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2023/10/09/bigDataComponents/hbase/HBase%20--%20%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F/" title="HBase -- 读取数据的几种方式">
-                        <span class="hidden-mobile">HBase -- 读取数据的几种方式</span>
+                      <a href="/2023/10/18/paimon/Apache%20Paimon%20--%20%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C/" title="Apache Paimon -- 文件操作">
+                        <span class="hidden-mobile">Apache Paimon -- 文件操作</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
